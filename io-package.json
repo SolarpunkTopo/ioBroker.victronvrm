@@ -1,0 +1,116 @@
+{
+	"common": {
+		"name": "victronvrm",
+		"version": "0.0.1",
+		"news": {
+			"0.0.1": {
+				"en": "initial release",
+				"de": "Erstveröffentlichung",
+				"ru": "Начальная версия",
+				"pt": "lançamento inicial",
+				"nl": "Eerste uitgave",
+				"fr": "Première version",
+				"it": "Versione iniziale",
+				"es": "Versión inicial",
+				"pl": "Pierwsze wydanie",
+				"uk": "Початкова версія",
+				"zh-cn": "首次出版"
+			}
+		},
+		"titleLang": {
+			"en": "Victron VRM Portal",
+			"de": "Victron VRM-Portal",
+			"ru": "Портал Victron VRM",
+			"pt": "Portal Victron VRM",
+			"nl": "Victron VRM-portaal",
+			"fr": "Portail Victron VRM",
+			"it": "Portale Victron VRM",
+			"es": "Portal VRM de Victron",
+			"pl": "Portal VRM firmy Victron",
+			"uk": "Портал Victron VRM",
+			"zh-cn": "Victron VRM 门户"
+		},
+		"desc": {
+			"en": "Data from the VRM Portal",
+			"de": "Daten aus dem VRM-Portal",
+			"ru": "Данные с портала VRM",
+			"pt": "Dados do Portal VRM",
+			"nl": "Gegevens van het VRM-portaal",
+			"fr": "Données du portail VRM",
+			"it": "Dati dal portale VRM",
+			"es": "Datos del Portal VRM",
+			"pl": "Dane z Portalu VRM",
+			"uk": "Дані з порталу VRM",
+			"zh-cn": "来自 VRM 门户的数据"
+		},
+		"authors": [
+			"Topo <balance240@gmail.com>"
+		],
+		"keywords": [
+			"VRM",
+			"Victron",
+			"iot",
+			"cloud",
+			"solar",
+			"battery",
+			"inverter"
+		],
+		"licenseInformation": {
+			"type": "free",
+			"license": "MIT"
+		},
+		"platform": "Javascript/Node.js",
+		"icon": "victronvrm.png",
+		"enabled": true,
+		"extIcon": "https://raw.githubusercontent.com/SolarpunkTopo/ioBroker.victronvrm/main/admin/victronvrm.png",
+		"readme": "https://github.com/SolarpunkTopo/ioBroker.victronvrm/blob/main/README.md",
+		"loglevel": "info",
+		"tier": 3,
+		"mode": "daemon",
+		"type": "energy",
+		"compact": true,
+		"connectionType": "cloud",
+		"dataSource": "poll",
+		"adminUI": {
+			"config": "json"
+		},
+		"dependencies": [
+			{
+				"js-controller": ">=6.0.11"
+			}
+		],
+		"globalDependencies": [
+			{
+				"admin": "7.0.23"
+			}
+		]
+	},
+	"native": {
+		"option1": true,
+		"option2": "42"
+	},
+	"objects": [],
+	"instanceObjects": [
+		{
+			"_id": "info",
+			"type": "channel",
+			"common": {
+				"name": "Information"
+			},
+			"native": {}
+		},
+		{
+			"_id": "info.connection",
+			"type": "state",
+			"common": {
+				"role": "indicator.connected",
+				"name": "Device or service connected",
+				"type": "boolean",
+				"read": true,
+				"write": false,
+				"def": false
+			},
+			"native": {}
+		}
+	]
+}

@@ -1,0 +1,47 @@
+{
+	"cli": true,
+	"target": "directory",
+	"adapterName": "victronvrm",
+	"title": "Victron VRM Portal",
+	"description": "Data from the VRM Portal",
+	"keywords": [
+		"VRM",
+		"Victron",
+		"iot",
+		"cloud",
+		"solar",
+		"battery",
+		"inverter"
+	],
+	"expert": "yes",
+	"features": [
+		"adapter"
+	],
+	"adminFeatures": [],
+	"type": "energy",
+	"startMode": "daemon",
+	"connectionType": "cloud",
+	"dataSource": "poll",
+	"connectionIndicator": "yes",
+	"language": "JavaScript",
+	"nodeVersion": "20",
+	"adminUi": "json",
+	"tools": [
+		"ESLint",
+		"type checking"
+	],
+	"releaseScript": "yes",
+	"devServer": "yes",
+	"devServerPort": 8081,
+	"indentation": "Tab",
+	"quotes": "single",
+	"authorName": "Topo",
+	"authorGithub": "SolarpunkTopo",
+	"authorEmail": "balance240@gmail.com",
+	"gitRemoteProtocol": "HTTPS",
+	"gitCommit": "yes",
+	"defaultBranch": "main",
+	"license": "MIT License",
+	"dependabot": "yes",
+	"creatorVersion": "2.6.5"
+}
