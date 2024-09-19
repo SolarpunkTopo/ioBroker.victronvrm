@@ -1,170 +1,139 @@
 'use strict';
 
-/*
- * Created with @iobroker/create-adapter v2.6.5
- */
-
-// The adapter-core module gives you access to the core ioBroker functions
-// you need to create an adapter
 const utils = require('@iobroker/adapter-core');
+const request = require('request');
 
-// Load your modules here, e.g.:
-// const fs = require("fs");
+// Hauptadapter-Klasse
+class VictronVrmAdapter extends utils.Adapter {
 
-class Victronvrm extends utils.Adapter {
+    constructor(options) {
+        super({
+            ...options,
+            name: 'victronvrm',
+        });
 
-	/**
-	 * @param {Partial<utils.AdapterOptions>} [options={}]
-	 */
-	constructor(options) {
-		super({
-			...options,
-			name: 'victronvrm',
-		});
-		this.on('ready', this.onReady.bind(this));
-		this.on('stateChange', this.onStateChange.bind(this));
-		// this.on('objectChange', this.onObjectChange.bind(this));
-		// this.on('message', this.onMessage.bind(this));
-		this.on('unload', this.onUnload.bind(this));
-	}
+        // Bindung der Funktionen
+        this.on('ready', this.onReady.bind(this));
+        this.on('unload', this.onUnload.bind(this));
+    }
 
-	/**
-	 * Is called when databases are connected and adapter received configuration.
-	 */
-	async onReady() {
-		// Initialize your adapter here
+    async onReady() {
+        // Adapter ist bereit und startet
+        this.log.info('Victron VRM Adapter gestartet.');
 
-		// Reset the connection indicator during startup
-		this.setState('info.connection', false, true);
+        // API-Key und andere Einstellungen aus den Konfigurationen lesen
+        // Initialisiere die Konfiguration
+		const apiKey = this.config.apiKey || '6b332d3fa2e2f2a7e0ff45100696df8af0e06c70b65bdb0d1c00417cf325973a';
+		const installationId = this.config.installationId || '425938';
+		const username = this.config.username || 'Christoph';
+		this.username= username;
+		const password = this.config.password || 'default_password';
+		const interval = this.config.interval || 60000;
 
-		// The adapters config (in the instance object everything under the attribute "native") is accessible via
-		// this.config:
-		this.log.info('config option1: ' + this.config.option1);
-		this.log.info('config option2: ' + this.config.option2);
+        // Wenn Einstellungen fehlen, Fehlermeldung ausgeben
+        if (!apiKey || !installationId || !username || !password) {
+            this.log.error('API-Key, Anlagen-ID, Benutzername und Passwort sind erforderlich.');
+            return;
+        }
 
-		/*
-		For every state in the system there has to be also an object of type state
-		Here a simple template for a boolean variable named "testVariable"
-		Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-		*/
-		await this.setObjectNotExistsAsync('testVariable', {
-			type: 'state',
-			common: {
-				name: 'testVariable',
-				type: 'boolean',
-				role: 'indicator',
-				read: true,
-				write: true,
-			},
-			native: {},
-		});
+        // Starte den API-Polling-Prozess
+        this.startPolling(apiKey, installationId, interval);
+    }
 
-		// In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-		this.subscribeStates('testVariable');
-		// You can also add a subscription for multiple states. The following line watches all states starting with "lights."
-		// this.subscribeStates('lights.*');
-		// Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
-		// this.subscribeStates('*');
+    // Funktion zur Abfrage der API-Daten und Verarbeitung
+    startPolling(apiKey, installationId, interval) {
+        const url = `https://vrmapi.victronenergy.com/v2/installations/${installationId}/diagnostics?count=1000`;
 
-		/*
-			setState examples
-			you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-		*/
-		// the variable testVariable is set to true as command (ack=false)
-		await this.setState('testVariable', false);
+        const options = {
+            url: url,
+            headers: {
+                'x-authorization': `Token ${apiKey}`
+            }
+        };
 
-		// same thing, but the value is flagged "ack"
-		// ack should be always set to true if the value is received from or acknowledged from the target system
-		await this.setState('testVariable', { val: true, ack: true });
+        const pollData = () => {
+            request.get(options, (error, response, body) => {
+                if (error) {
+                    this.log.error('Fehler bei der API-Abfrage: ' + error);
+                    return;
+                }
 
-		// same thing, but the state is deleted after 30s (getState will return null afterwards)
-		await this.setState('testVariable', { val: true, ack: true, expire: 30 });
+                if (response.statusCode === 200) {
+                    try {
+						this.log.info('Request ok... ');
+                        const data = JSON.parse(body);
+                        if (data.records && Array.isArray(data.records)) {
+                            this.processVictronRecords(data.records);
+							
+							// Setze den Verbindungsstatus auf true bei erfolgreichem Request
+							this.setState('info.connection', true, true);
+						
+						
+						} else {
+                            this.log.error('Unerwartetes Datenformat.');
+                        }
+                    } catch (err) {
+                        this.log.error('Fehler beim Verarbeiten der API-Daten: ' + err);
+                    }
+                } else {
+                    this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode);
+                }
+            });
+        };
 
-		// examples for the checkPassword/checkGroup functions
-		let result = await this.checkPasswordAsync('admin', 'iobroker');
-		this.log.info('check user admin pw iobroker: ' + result);
+        // Daten in regelmäßigen Abständen abfragen
+        this.log.info(`Starte API-Abfragen alle ${interval / 1000} Sekunden.`);
+        this.pollingInterval = setInterval(pollData, interval);
 
-		result = await this.checkGroupAsync('admin', 'admin');
-		this.log.info('check group user admin group admin: ' + result);
-	}
+        // Initiale API-Abfrage starten
+        pollData();
+    }
 
-	/**
-	 * Is called when adapter shuts down - callback has to be called under any circumstances!
-	 * @param {() => void} callback
-	 */
-	onUnload(callback) {
-		try {
-			// Here you must clear all timeouts or intervals that may still be active
-			// clearTimeout(timeout1);
-			// clearTimeout(timeout2);
-			// ...
-			// clearInterval(interval1);
+    // Verarbeite die API-Daten und lege Datenpunkte an
+    processVictronRecords(records) {
+        records.forEach(record => {
+            const dbusServiceType = record.dbusServiceType;
+            const description = record.description.replace(/\s+/g, '_');
+            const basePath = `${this.username}.${dbusServiceType}.${description}`;
+			this.log.info(this.username);
+            for (let key in record) {
+                if (key !== 'dbusServiceType' && key !== 'description') {
+                    const dataPointName = `${basePath}.${key}`;
+                    const value = record[key];
 
-			callback();
-		} catch (e) {
-			callback();
-		}
-	}
+                    this.setObjectNotExistsAsync(dataPointName, {
+                        type: 'state',
+                        common: {
+                            name: key,
+                            type: typeof value,
+                            role: 'value',
+                            read: true,
+                            write: false
+                        },
+                        native: {}
+                    });
 
-	// If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-	// You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-	// /**
-	//  * Is called if a subscribed object changes
-	//  * @param {string} id
-	//  * @param {ioBroker.Object | null | undefined} obj
-	//  */
-	// onObjectChange(id, obj) {
-	// 	if (obj) {
-	// 		// The object was changed
-	// 		this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-	// 	} else {
-	// 		// The object was deleted
-	// 		this.log.info(`object ${id} deleted`);
-	// 	}
-	// }
+                    this.setState(dataPointName, { val: value, ack: true });
+					
+				}
+            }
+        });
+    }
 
-	/**
-	 * Is called if a subscribed state changes
-	 * @param {string} id
-	 * @param {ioBroker.State | null | undefined} state
-	 */
-	onStateChange(id, state) {
-		if (state) {
-			// The state was changed
-			this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-		} else {
-			// The state was deleted
-			this.log.info(`state ${id} deleted`);
-		}
-	}
-
-	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
-	// /**
-	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-	//  * Using this method requires "common.messagebox" property to be set to true in io-package.json
-	//  * @param {ioBroker.Message} obj
-	//  */
-	// onMessage(obj) {
-	// 	if (typeof obj === 'object' && obj.message) {
-	// 		if (obj.command === 'send') {
-	// 			// e.g. send email or pushover or whatever
-	// 			this.log.info('send command');
-
-	// 			// Send response in callback if required
-	// 			if (obj.callback) this.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-	// 		}
-	// 	}
-	// }
-
+    onUnload(callback) {
+        try {
+            if (this.pollingInterval) {
+                clearInterval(this.pollingInterval);
+            }
+            callback();
+        } catch (e) {
+            callback();
+        }
+    }
 }
 
-if (require.main !== module) {
-	// Export the constructor in compact mode
-	/**
-	 * @param {Partial<utils.AdapterOptions>} [options={}]
-	 */
-	module.exports = (options) => new Victronvrm(options);
+if (module.parent) {
+    module.exports = (options) => new VictronVrmAdapter(options);
 } else {
-	// otherwise start the instance directly
-	new Victronvrm();
+    new VictronVrmAdapter();
 }

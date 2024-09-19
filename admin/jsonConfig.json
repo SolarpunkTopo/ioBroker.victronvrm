@@ -1,16 +1,36 @@
 {
-	"i18n": true,
-	"type": "panel",
-	"items": {
-		"option1": {
-			"type": "checkbox",
-			"label": "option1",
-			"newLine": true
-		},
-		"option2": {
-			"type": "text",
-			"label": "option2",
-			"newLine": true
-		}
-	}
+    "type": "object",
+    "properties": {
+        "apiKey": {
+            "type": "string",
+            "title": "API Key",
+            "desc": "Enter your API Key here",
+            "default": "6b332d3fa2e2f2a7e0ff45100696df8af0e06c70b65bdb0d1c00417cf325973a"
+        },
+        "installationId": {
+            "type": "string",
+            "title": "Installation ID",
+            "desc": "Enter your Installation ID here",
+            "default": "425938"
+        },
+        "username": {
+            "type": "string",
+            "title": "Username",
+            "desc": "Enter your Username here",
+            "default": "Topo"
+        },
+        "password": {
+            "type": "string",
+            "title": "Password",
+            "desc": "Enter your Password here",
+            "type": "password",
+            "default": "default_password"
+        },
+        "interval": {
+            "type": "number",
+            "title": "Data Query Interval",
+            "desc": "Enter the interval (in milliseconds) for querying data",
+            "default": 60000
+        }
+    }
 }
