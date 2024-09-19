@@ -3,12 +3,6 @@
 
 [![NPM version](https://img.shields.io/npm/v/iobroker.victronvrm.svg)](https://www.npmjs.com/package/iobroker.victronvrm)
 [![Downloads](https://img.shields.io/npm/dm/iobroker.victronvrm.svg)](https://www.npmjs.com/package/iobroker.victronvrm)
-![Number of Installations](https://iobroker.live/badges/victronvrm-installed.svg)
-![Current version in stable repository](https://iobroker.live/badges/victronvrm-stable.svg)
-
-[![NPM](https://nodei.co/npm/iobroker.victronvrm.png?downloads=true)](https://nodei.co/npm/iobroker.victronvrm/)
-
-**Tests:** ![Test and Release](https://github.com/SolarpunkTopo/ioBroker.victronvrm/workflows/Test%20and%20Release/badge.svg)
 
 ## victronvrm adapter for ioBroker
 
@@ -24,6 +18,7 @@ Data from the VRM Portal
 
 ### **WORK IN PROGRESS**
 * (Topo) initial release
+IN WORK! NO RELEASE
 
 ## License
 MIT License
