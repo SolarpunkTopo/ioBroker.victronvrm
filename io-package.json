@@ -43,7 +43,7 @@
     "connectionType": "cloud",
     "dataSource": "poll",
     "adminUI": {
-      "config": "jsonConfig.json",
+      "config": "json",
       "pages": {
         "settings": "index_m.html"
       },
@@ -63,8 +63,8 @@
   "native": {
     "apiKey": "",
     "installationId": "",
-    "username": "username",
-    "password": "password",
+    "username": "",
+    "password": "",
     "interval": 60000
   },
   "objects": [],

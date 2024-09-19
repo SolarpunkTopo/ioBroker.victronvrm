@@ -1,36 +1,55 @@
 {
-    "type": "panel",
-    "properties": {
-        "apiKey": {
-            "type": "string",
-            "title": "API Key",
-            "desc": "Enter your API Key here",
-            "default": ""
+    "type": "tabs",
+    "items": {
+        "options1": {
+            "type": "panel",
+            "label": "Tab1",
+            "items": {
+                "username": {
+                    "type": "text",
+                    "label": "Username",
+                    "sm": 3
+                },
+                "password": {
+                    "type": "text",
+                    "label": "Passwort",
+                    "sm": 3
+                },
+                "apiKey": {
+                    "type": "text",
+                    "label": "API-Token",
+                    "sm": 3
+                },
+                "installationId": {
+                    "type": "text",
+                    "label": "Anlagen-ID",
+                    "sm": 3
+                },
+                "interval": {
+                    "type": "number",
+                    "label": "Abfrageintervall (ms)",
+                    "sm": 3
+                },"check": {
+                    "type": "checkbox",
+                    "label": "ich habe übelst Bock und bin nachhaltig",
+                }
+				
+				,"check2": {
+                    "type": "checkbox",
+                    "label": "trinke Bier nur aus Mehrwegflaschen",
+                }
+				,"check3": {
+                    "type": "checkbox",
+                    "label": "benutze kein Plastik",
+                },
+				"check4": {
+                    "type": "checkbox",
+                    "label": "ich bin ein SolarPunk!",
+                }
+            }
         },
-        "installationId": {
-            "type": "string",
-            "title": "Installation ID",
-            "desc": "Enter your Installation ID here",
-            "default": ""
-        },
-        "username": {
-            "type": "string",
-            "title": "Username",
-            "desc": "Enter your Username here",
-            "default": "username"
-        },
-        "password": {
-            "type": "string",
-            "title": "Password",
-            "desc": "Enter your Password here",
-            "type": "password",
-            "default": "default_password"
-        },
-        "interval": {
-            "type": "number",
-            "title": "Data Query Interval",
-            "desc": "Enter the interval (in milliseconds) for querying data",
-            "default": 60000
+        "tab2": {
+            "label": "Tab2"
         }
     }
 }
