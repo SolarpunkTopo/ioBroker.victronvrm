@@ -1,4 +1,5 @@
 {
+  "type": "panel",
   "common": {
     "name": "victronvrm",
     "version": "0.0.1",
@@ -55,7 +56,7 @@
     ],
     "globalDependencies": [
       {
-        "admin": ">=7.1.1"
+        "admin": ">=7.0.23"
       }
     ]
   },

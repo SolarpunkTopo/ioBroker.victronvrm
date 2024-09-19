@@ -95,7 +95,7 @@ class VictronVrmAdapter extends utils.Adapter {
             const dbusServiceType = record.dbusServiceType;
             const description = record.description.replace(/\s+/g, '_');
             const basePath = `${this.username}.${dbusServiceType}.${description}`;
-			this.log.info(this.username);
+			
             for (let key in record) {
                 if (key !== 'dbusServiceType' && key !== 'description') {
                     const dataPointName = `${basePath}.${key}`;
