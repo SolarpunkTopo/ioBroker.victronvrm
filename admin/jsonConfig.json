@@ -3,7 +3,7 @@
     "items": {
         "options1": {
             "type": "panel",
-            "label": "Tab1",
+            "label": "VRM Portal Login",
             "items": {
                 "username": {
                     "type": "text",
@@ -49,7 +49,7 @@
             }
         },
         "tab2": {
-            "label": "Tab2"
+            "label": "Anlagendaten"
         }
     }
 }
