@@ -1,7 +1,7 @@
 {
     "type": "tabs",
     "items": {
-        "options1": {
+        "_options1": {
             "type": "panel",
             "label": "VRM Portal Login",
             "items": {
@@ -11,7 +11,7 @@
                     "sm": 3
                 },
                 "password": {
-                    "type": "text",
+                    "type": "password",
                     "label": "Passwort",
                     "sm": 3
                 },
@@ -29,27 +29,40 @@
                     "type": "number",
                     "label": "Abfrageintervall (ms)",
                     "sm": 3
-                },"check": {
-                    "type": "checkbox",
-                    "label": "ich habe übelst Bock und bin nachhaltig",
-                }
-				
-				,"check2": {
-                    "type": "checkbox",
-                    "label": "trinke Bier nur aus Mehrwegflaschen",
-                }
-				,"check3": {
-                    "type": "checkbox",
-                    "label": "benutze kein Plastik",
                 },
-				"check4": {
+                "check": {
                     "type": "checkbox",
-                    "label": "ich bin ein SolarPunk!",
-                }
+                    "label": "Ich habe übelst Bock und bin nachhaltig"
+					
+                },
+               
+			   "_fetchApiDetailsButton": {
+				  "type": "sendTo",
+				  "label": "Hole Token und Station ID",
+				  "variant": "contained",
+				  "showProcess": true,
+				  "command": "fetchApiDetails",
+				  "result": {"1": "Check the log or your pushover app!" },
+				  "jsonData": "{\"username\": \"${data.username}\", \"password\": \"${data.password}\"}",
+				  "useNative": false,
+				  "disabled": "data.username === '' || data.password === ''",
+				  "tooltip": "Click to fetch API token and station ID",
+				  "help": "helptext"
+				},
+				
             }
         },
-        "tab2": {
-            "label": "Anlagendaten"
+        "_tab2": {
+            "type": "panel",
+            "label": "Anlagendaten",
+            "items": {}  // Leeres Objekt oder weitere Definitionen hinzufügen
+        },
+        "_tab3": {
+            "type": "panel",
+            "label": "Anlagendaten2",
+            "items": {}  // Leeres Objekt oder weitere Definitionen hinzufügen
         }
     }
 }
+
+

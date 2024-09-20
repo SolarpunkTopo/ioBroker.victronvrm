@@ -1,4 +1,5 @@
 {
+  "i18n": true,
   "type": "panel",
   "common": {
     "name": "victronvrm",
@@ -36,18 +37,14 @@
     "extIcon": "https://raw.githubusercontent.com/SolarpunkTopo/ioBroker.victronvrm/main/admin/victronvrm.png",
     "readme": "https://github.com/SolarpunkTopo/ioBroker.victronvrm/blob/main/README.md",
     "loglevel": "info",
-    "tier": 3,
     "mode": "daemon",
     "type": "energy",
     "compact": true,
-    "connectionType": "cloud",
+    "materialize": true,
+	"connectionType": "cloud",
     "dataSource": "poll",
     "adminUI": {
-      "config": "json",
-      "pages": {
-        "settings": "index_m.html"
-      },
-      "type": "panel"
+      "config": "json"
     },
     "dependencies": [
       {
