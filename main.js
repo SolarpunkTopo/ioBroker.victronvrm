@@ -248,7 +248,7 @@ startPolling(apiKey, installationIds, interval) {
         const options = {
             url: url,
             headers: {
-                'x-authorization': `Bearer ${apiKey}`
+                'x-authorization': `Bearer ${this.apiKey}`
             }
         };
 
@@ -274,6 +274,8 @@ startPolling(apiKey, installationIds, interval) {
                     this.log.error('Fehler beim Verarbeiten der API-Daten: ' + err);
                 }
             } else {
+				const { apiToken, idUser } =  this.getApiToken(this.username, this.password);
+				this.apiKey = apiToken;
                 this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode);
             }
         });
