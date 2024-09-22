@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "victronvrm",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "titleLang": {
       "en": "Victron VRM Portal",
       "de": "Victron VRM-Portal"
@@ -39,7 +39,7 @@
     },
     "dependencies": [
       {
-        "js-controller": ">=6.0.11"
+        "js-controller": ">=6.0.0"
       }
     ],
     "globalDependencies": [
@@ -54,7 +54,7 @@
 	"installationName": "",
     "username": "",
     "password": "",
-    "interval": 60000
+    "interval": 60
   },
   "objects": [],
   "instanceObjects": [
