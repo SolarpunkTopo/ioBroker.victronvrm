@@ -273,16 +273,31 @@ async getInstallationId(apiToken, idUser) {
                     this.log.error('Fehler beim Verarbeiten der API-Daten: ' + err);
                 }
             } else if (response.statusCode === 401) {
-                this.log.warn('Token abgelaufen, erneuere Token...');
-                this.getApiToken()
-                    .then(({ apiToken: newToken }) => {
-                        this.updateConfig({ apiKey: newToken }); // Speichere den neuen Token
-                        pollData(newToken, installationId, installationName); // Wiederhole den API-Aufruf mit neuem Token
-                    })
-                    .catch(err => {
-                        this.log.error('Fehler beim Erneuern des API-Tokens: ' + err);
-                    });
-            } else {
+                
+            
+			
+			
+		//#################################################################################	
+			const { apiToken, idUser } = await this.getApiToken(username, password);
+				//const  installations = await this.getInstallationId(apiToken, idUser);
+				
+			
+			if (installations.length > 0) {
+					
+				// Speichern der API-Daten in der Adapterkonfiguration
+				this.apiKey				= apiKey;
+				this.idUser 			= idUser;
+				// this.installationIds 	= installations;
+				
+				
+				this.log.info('Successfully fetched RENEW API token !!!');
+		 }
+		//###########################################################################	
+			
+			
+			
+			
+			} else {
                 this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode + ' ' + url + ' ' + installationId);
                 // Logge die gesamte Antwort, um zu sehen, was zurückgegeben wird
                 this.log.info('Antwort des Langzeit-API-Token Requests: ' + JSON.stringify(response));
