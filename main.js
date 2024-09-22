@@ -240,15 +240,14 @@ async getInstallationId(apiToken, idUser) {
 
 
 
-   // Abfrage der API-Daten und Verarbeitung
-startPolling(apiKey, installationIds, interval) {
-    const pollData = (installationId, installationName) => {
+ startPolling(apiKey, installationIds, interval) {
+    const pollData = (apiToken, installationId, installationName) => {
         const url = `https://vrmapi.victronenergy.com/v2/installations/${installationId}/diagnostics?count=1000`;
 
         const options = {
             url: url,
             headers: {
-                'x-authorization': `Bearer ${this.apiKey}`
+                'x-authorization': `Bearer ${apiToken}`
             }
         };
 
@@ -273,34 +272,45 @@ startPolling(apiKey, installationIds, interval) {
                 } catch (err) {
                     this.log.error('Fehler beim Verarbeiten der API-Daten: ' + err);
                 }
+            } else if (response.statusCode === 401) {
+                this.log.warn('Token abgelaufen, erneuere Token...');
+                this.getApiToken()
+                    .then(({ apiToken: newToken }) => {
+                        this.updateConfig({ apiKey: newToken }); // Speichere den neuen Token
+                        pollData(newToken, installationId, installationName); // Wiederhole den API-Aufruf mit neuem Token
+                    })
+                    .catch(err => {
+                        this.log.error('Fehler beim Erneuern des API-Tokens: ' + err);
+                    });
             } else {
-			    this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode + url + ' ' + installationId);
-				// Logge die gesamte Antwort, um zu sehen, was zurückgegeben wird
-				this.log.info('Antwort des Langzeit-API-Token Requests: ' + JSON.stringify(response));
-				this.log.info('Response Body: ' + JSON.stringify(body));
-			}
+                this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode + ' ' + url + ' ' + installationId);
+                // Logge die gesamte Antwort, um zu sehen, was zurückgegeben wird
+                this.log.info('Antwort des Langzeit-API-Token Requests: ' + JSON.stringify(response));
+                this.log.info('Response Body: ' + JSON.stringify(body));
+            }
         });
     };
 
     // Funktion zur Abfrage für alle Installationen
-    const pollAllData = () => {
+    const pollAllData = (apiToken) => {
         if (!Array.isArray(installationIds) || installationIds.length === 0) {
             this.log.warn('Keine gültigen Installation IDs zum Abfragen.');
             return;
         }
 
         installationIds.forEach(({ id, name }) => {
-            pollData(id, name); // ID und Name übergeben
+            pollData(apiToken, id, name); // ID und Name übergeben
         });
     };
 
     // Daten in regelmäßigen Abständen abfragen
     this.log.info(`Starte API-Abfragen alle ${interval / 1000} Sekunden.`);
-    this.pollingInterval = setInterval(pollAllData, (interval));
+    this.pollingInterval = setInterval(() => pollAllData(apiKey), interval);
 
     // Initiale API-Abfrage für alle Installationen starten
-    pollAllData();
+    pollAllData(apiKey);
 }
+
 
 
 
