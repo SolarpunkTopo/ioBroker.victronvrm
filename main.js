@@ -274,10 +274,11 @@ startPolling(apiKey, installationIds, interval) {
                     this.log.error('Fehler beim Verarbeiten der API-Daten: ' + err);
                 }
             } else {
-				const { apiToken, idUser } =  this.getApiToken(this.username, this.password);
-				this.apiKey = apiToken;
-                this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode);
-            }
+			    this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode + url + ' ' + installationId);
+				// Logge die gesamte Antwort, um zu sehen, was zurückgegeben wird
+				this.log.info('Antwort des Langzeit-API-Token Requests: ' + JSON.stringify(response));
+				this.log.info('Response Body: ' + JSON.stringify(body));
+			}
         });
     };
 
