@@ -15,52 +15,30 @@
                     "label": "Passwort",
                     "sm": 3
                 },
-                "apiKey": {
-                    "type": "text",
-                    "label": "API-Token",
-                    "sm": 3
-                },
-                "installationId": {
-                    "type": "text",
-                    "label": "Anlagen-ID",
-                    "sm": 3
-                },
+                
+	
                 "interval": {
-                    "type": "number",
-                    "label": "Abfrageintervall (ms)",
-                    "sm": 3
-                },
-                "check": {
-                    "type": "checkbox",
-                    "label": "Ich habe übelst Bock und bin nachhaltig"
-					
-                },
+					"type": "number",
+					"label": "Abfrageintervall (s)",
+					"required": true,
+					"min": 30,
+					"max": 600,
+					"step": 5,
+					"sm": 3
+					}
                
-			   "_fetchApiDetailsButton": {
-				  "type": "sendTo",
-				  "label": "Hole Token und Station ID",
-				  "variant": "contained",
-				  "showProcess": true,
-				  "command": "fetchApiDetails",
-				  "result": {"1": "Check the log or your pushover app!" },
-				  "jsonData": "{\"username\": \"${data.username}\", \"password\": \"${data.password}\"}",
-				  "useNative": false,
-				  "disabled": "data.username === '' || data.password === ''",
-				  "tooltip": "Click to fetch API token and station ID",
-				  "help": "helptext"
-				},
 				
             }
         },
         "_tab2": {
             "type": "panel",
             "label": "Anlagendaten",
-            "items": {}  // Leeres Objekt oder weitere Definitionen hinzufügen
+            "items": {}  
         },
         "_tab3": {
             "type": "panel",
             "label": "Anlagendaten2",
-            "items": {}  // Leeres Objekt oder weitere Definitionen hinzufügen
+            "items": {}  
         }
     }
 }

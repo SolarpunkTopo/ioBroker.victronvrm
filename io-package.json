@@ -1,15 +1,7 @@
 {
-  "i18n": true,
-  "type": "panel",
   "common": {
     "name": "victronvrm",
-    "version": "0.0.1",
-    "news": {
-      "0.0.1": {
-        "en": "Initial release",
-        "de": "Erstveröffentlichung"
-      }
-    },
+    "version": "0.0.2",
     "titleLang": {
       "en": "Victron VRM Portal",
       "de": "Victron VRM-Portal"
@@ -33,18 +25,17 @@
     "license": "MIT",
     "platform": "Javascript/Node.js",
     "icon": "victronvrm.png",
-    "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/SolarpunkTopo/ioBroker.victronvrm/main/admin/victronvrm.png",
     "readme": "https://github.com/SolarpunkTopo/ioBroker.victronvrm/blob/main/README.md",
     "loglevel": "info",
-    "mode": "daemon",
     "type": "energy",
     "compact": true,
-    "materialize": true,
+    "mode": "daemon",
+    "messagebox": true,
 	"connectionType": "cloud",
     "dataSource": "poll",
     "adminUI": {
-      "config": "json"
+      "config": "json"  
     },
     "dependencies": [
       {
@@ -60,6 +51,7 @@
   "native": {
     "apiKey": "",
     "installationId": "",
+	"installationName": "",
     "username": "",
     "password": "",
     "interval": 60000
