@@ -58,7 +58,7 @@ class VictronVrmAdapter extends utils.Adapter {
 				this.apiKey				= apiKey;
 				this.idUser 			= idUser;
 				this.installationIds 	= installations;
-				this.updateConfig({ installations });
+				
 				
 				this.log.info('Successfully fetched API token and installation ID.');
 		 }
@@ -130,9 +130,9 @@ async getApiToken(username, password) {
                 const apiToken = body.token;  // Der Bearer-Token
                 const idUser   = body.idUser; //idUser für urls
 				// Speichern des Tokens in den Einstellungen
-                this.config.apiKey = apiToken;
-                this.setState('info.connection', true, true);
-
+                this.apiKey			= apiToken;
+				this.setState('info.connection', true, true);
+				this.log.info('API Token erfolgreich geholt');
                 // Erfolgreich den API-Token und idUser zurückgeben
                 resolve({ apiToken, idUser });
             } else {
