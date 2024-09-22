@@ -278,7 +278,7 @@ async getInstallationId(apiToken, idUser) {
 			
 			
 		//#################################################################################	
-			const { apiToken, idUser } =  this.getApiToken(username, password);
+			const { apiToken, idUser } =  this.getApiToken(this.username, this.password);
 				//const  installations = await this.getInstallationId(apiToken, idUser);
 				
 			
