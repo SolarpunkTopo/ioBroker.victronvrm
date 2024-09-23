@@ -3,6 +3,10 @@
 const utils = require('@iobroker/adapter-core');
 const request = require('request');
 const axios = require('axios');
+
+
+const VRM = require('./lib/libvrm.js');
+
 // Hauptadapter-Klasse
 class VictronVrmAdapter extends utils.Adapter {
 
@@ -32,11 +36,13 @@ class VictronVrmAdapter extends utils.Adapter {
 		const password = this.config.password;
 		const interval = this.config.interval || 60;
 		const installations = this.config.installations;
-
+		const BearerToken  = this.config.BearerToken;
+		
 		this.username  			= username;
 		this.password  			= password;
 		this.apiKey				= apiKey;
 		this.installations		= installations;
+
 
         // Wenn Einstellungen fehlen, Fehlermeldung ausgeben
         if (!username || !password) {
@@ -50,28 +56,27 @@ class VictronVrmAdapter extends utils.Adapter {
 	try {
 				// API-Login und Abruf der API-Daten
 				
-				const { apiToken, idUser } = await this.getApiToken(username, password);
-				const  installations = await this.getInstallationId(apiToken, idUser);
+				const { BearerToken, idUser } = await this.getApiToken(username, password);
+				const  installations = await this.getInstallationId(BearerToken, idUser);
 				
 			
-			if (installations.length > 0) {
+			
 					
 				// Speichern der API-Daten in der Adapterkonfiguration
-				this.apiKey				= apiKey;
+				this.BearerToken		= BearerToken;
 				this.idUser 			= idUser;
 				this.installationIds 	= installations;
 				
 				
 				this.log.info('Successfully fetched API token and installation ID.');
-		 }
+		
 			
 			} catch (error) {
 				this.log.error('Error fetching API token or installation ID:', error);
 			}
 	
-	
 	// Starte den API-Polling-Prozess
-    await   this.startPolling(apiKey, this.installationIds, (interval*1000));
+    await   this.startPolling(BearerToken, this.installationIds, (interval*1000));
     
 	
 		
@@ -129,16 +134,17 @@ async getApiToken(username, password) {
             }
 
             if (response.statusCode === 200 && body.token && body.idUser) {
-                const apiToken = body.token;  // Der Bearer-Token
+                const BearerToken = body.token;  // Der Bearer-Token
                 const idUser   = body.idUser; //idUser für urls
 				// Speichern des Tokens in den Einstellungen
-                this.apiKey			= apiToken;
+                this.BearerToken			= BearerToken;
 				this.setState('info.connection', true, true);
-				this.log.info('API Token erfolgreich geholt');
+				this.log.info('BearerToken erfolgreich geholt');
                 // Erfolgreich den API-Token und idUser zurückgeben
-                resolve({ apiToken, idUser });
+				
+			   resolve({ BearerToken, idUser });
             } else {
-                this.log.error('Fehler beim Abrufen des API-Tokens: ' + response.statusCode);
+                this.log.error('Fehler beim Abrufen des BearerToken: ' + response.statusCode);
                 reject(new Error('Invalid response'));
             }
         });
@@ -190,12 +196,12 @@ async getApiToken(username, password) {
 
 
 
-async getInstallationId(apiToken, idUser) {
+async getInstallationId(BearerToken, idUser) {
     return new Promise((resolve, reject) => {
         request.get({
             url: `https://vrmapi.victronenergy.com/v2/users/${idUser}/installations`,
             headers: {
-                'x-authorization': `Bearer ${apiToken}`,
+                'x-authorization': `Bearer ${this.BearerToken}`,
                 'Content-Type': 'application/json'
             }
         }, (error, response, body) => {
@@ -242,14 +248,14 @@ async getInstallationId(apiToken, idUser) {
 
 
 
- startPolling(apiKey, installationIds, interval) {
-    const pollData = (apiToken, installationId, installationName) => {
+ startPolling(BearerToken, installationIds, interval) {
+    const pollData = (BearerToken, installationId, installationName) => {
         const url = `https://vrmapi.victronenergy.com/v2/installations/${installationId}/diagnostics?count=1000`;
 
         const options = {
             url: url,
             headers: {
-                'x-authorization': `Bearer ${apiToken}`
+                'x-authorization': `Bearer ${this.BearerToken}`
             }
         };
 
@@ -280,14 +286,14 @@ async getInstallationId(apiToken, idUser) {
 			
 			
 		//#################################################################################	
-			const { apiToken, idUser } =  this.getApiToken(this.username, this.password);
+			const { BearerToken, idUser } =  this.getApiToken(this.username, this.password);
 				//const  installations = await this.getInstallationId(apiToken, idUser);
 				
 			
 			
 					
 				// Speichern der API-Daten in der Adapterkonfiguration
-				this.apiKey				= apiToken;
+				this.BearerToken				= BearerToken;
 				this.idUser 			= idUser;
 				// this.installationIds 	= installations;
 				
@@ -316,16 +322,16 @@ async getInstallationId(apiToken, idUser) {
         }
 
         installationIds.forEach(({ id, name }) => {
-            pollData(apiToken, id, name); // ID und Name übergeben
+            pollData(this.BearerToken, id, name); // ID und Name übergeben
         });
     };
 
     // Daten in regelmäßigen Abständen abfragen
     this.log.info(`Starte API-Abfragen alle ${interval / 1000} Sekunden.`);
-    this.pollingInterval = setInterval(() => pollAllData(this.apiKey), interval);
+    this.pollingInterval = setInterval(() => pollAllData(this.BearerToken), interval);
 
     // Initiale API-Abfrage für alle Installationen starten
-    pollAllData(apiKey);
+    pollAllData(this.BearerToken);
 }
 
 
