@@ -27,7 +27,7 @@ class VictronVrmAdapter extends utils.Adapter {
 
         // API-Key und andere Einstellungen aus den Konfigurationen lesen
         // Initialisiere die Konfiguration
-		// const apiKey = this.config.apiKey;
+		const apiKey = this.config.apiKey;
 		const username = this.config.username;
 		const password = this.config.password;
 		const interval = this.config.interval || 60;
@@ -35,6 +35,7 @@ class VictronVrmAdapter extends utils.Adapter {
 
 		this.username  			= username;
 		this.password  			= password;
+		this.apiKey				= apiKey;
 
         // Wenn Einstellungen fehlen, Fehlermeldung ausgeben
         if (!username || !password) {
