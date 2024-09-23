@@ -284,16 +284,16 @@ async getInstallationId(apiToken, idUser) {
 				//const  installations = await this.getInstallationId(apiToken, idUser);
 				
 			
-			if (installations.length > 0) {
+			
 					
 				// Speichern der API-Daten in der Adapterkonfiguration
-				this.apiKey				= apiKey;
+				this.apiKey				= apiToken;
 				this.idUser 			= idUser;
 				// this.installationIds 	= installations;
 				
 				
 				this.log.info('Successfully fetched RENEW API token !!!');
-		 }
+		
 		//###########################################################################	
 			
 			
@@ -322,7 +322,7 @@ async getInstallationId(apiToken, idUser) {
 
     // Daten in regelmäßigen Abständen abfragen
     this.log.info(`Starte API-Abfragen alle ${interval / 1000} Sekunden.`);
-    this.pollingInterval = setInterval(() => pollAllData(apiKey), interval);
+    this.pollingInterval = setInterval(() => pollAllData(this.apiKey), interval);
 
     // Initiale API-Abfrage für alle Installationen starten
     pollAllData(apiKey);
