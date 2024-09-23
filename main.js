@@ -31,11 +31,12 @@ class VictronVrmAdapter extends utils.Adapter {
 		const username = this.config.username;
 		const password = this.config.password;
 		const interval = this.config.interval || 60;
-
+		const installations = this.config.installations;
 
 		this.username  			= username;
 		this.password  			= password;
 		this.apiKey				= apiKey;
+		this.installations		= installations;
 
         // Wenn Einstellungen fehlen, Fehlermeldung ausgeben
         if (!username || !password) {
