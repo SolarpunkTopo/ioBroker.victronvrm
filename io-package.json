@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "victronvrm",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "titleLang": {
       "en": "Victron VRM Portal",
       "de": "Victron VRM-Portal"
@@ -54,7 +54,7 @@
 	"installationName": "",
     "username": "",
     "password": "",
-    "interval": 60
+    "interval": 120
   },
   "objects": [],
   "instanceObjects": [

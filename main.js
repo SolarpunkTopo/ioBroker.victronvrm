@@ -2,10 +2,11 @@
 
 const utils = require('@iobroker/adapter-core');
 const request = require('request');
-const axios = require('axios');
+const axios = require('axios').default;
 
 
 const VRM = require('./lib/libvrm.js');
+const TOOLS = require('./lib/vrmutils.js');
 
 // Hauptadapter-Klasse
 class VictronVrmAdapter extends utils.Adapter {
@@ -21,13 +22,19 @@ class VictronVrmAdapter extends utils.Adapter {
         this.on('unload', this.onUnload.bind(this));
 		this.on('message', this.onMessage.bind(this));
     
-
+	   this.vrm = new VRM(this); // VRM-Instanz erstellen
+	   this.tools = new TOOLS(this); // VRM-utils erstellen
 	}
 
 
  async onReady() {
         // Adapter ist bereit und startet
         this.log.info('Victron VRM Adapter gestartet.');
+
+
+		
+		
+		
 
         // API-Key und andere Einstellungen aus den Konfigurationen lesen
         // Initialisiere die Konfiguration
@@ -46,63 +53,35 @@ class VictronVrmAdapter extends utils.Adapter {
 
         // Wenn Einstellungen fehlen, Fehlermeldung ausgeben
         if (!username || !password) {
-            this.log.error('Benutzername und Passwort sind erforderlich.');
+				this.log.error('Benutzername und Passwort sind erforderlich.');
             return;
         }
-
-
-	
 	
 	try {
 				// API-Login und Abruf der API-Daten
 				
-				const { BearerToken, idUser } = await this.getApiToken(username, password);
-				const  installations = await this.getInstallationId(BearerToken, idUser);
+				const { BearerToken, idUser } = await this.vrm.getApiToken(username, password);
+				const  installations = await this.vrm.getInstallationId(BearerToken, idUser);
+				// const  longTermApiToken = await this.vrm.getLongTermApiToken(BearerToken, idUser);			
 				
-			
-			
-					
+				
 				// Speichern der API-Daten in der Adapterkonfiguration
 				this.BearerToken		= BearerToken;
 				this.idUser 			= idUser;
 				this.installationIds 	= installations;
-				
-				
-				this.log.info('Successfully fetched API token and installation ID.');
-		
-			
+					this.log.info('Successfully fetched API token and installation ID.');
+					this.log.warn('Successfully fetched log term API token' + longTermApiToken);
+					
 			} catch (error) {
-				this.log.error('Error fetching API token or installation ID:', error);
+					this.log.error('Error fetching API token or installation ID:', error);
 			}
+	
 	
 	// Starte den API-Polling-Prozess
     await   this.startPolling(BearerToken, this.installationIds, (interval*1000));
-    
-	
-		
-		
-	this.setObjectNotExistsAsync('info.alive', {
-    type: 'state',
-    common: {
-        name: 'Alive',
-        type: 'boolean',
-        role: 'indicator.connected',
-        read: true,
-        write: false,
-        def: false
-    },
-    native: {}
-}).then(() => {
-    // Lebenszeichen setzen
-    setInterval(() => {
-        this.setState('info.alive', { val: true, ack: true }); // true = Adapter ist am Leben
-    }, 60000); // Jede Minute das Lebenszeichen setzen
-});
+    await	this.tools.setAlive();
+}
 
-
-
-
-	}
 
 
 
@@ -117,66 +96,26 @@ async onMessage(obj) {
 
 
 
-async getApiToken(username, password) {
-    return new Promise((resolve, reject) => {
-        request.post({
-            url: 'https://vrmapi.victronenergy.com/v2/auth/login',
-            json: true,
-            body: { 
-					username: username, 
-					password: password 
-		},
-            headers: { 'Content-Type': 'application/json' }
-        }, (error, response, body) => {
-            if (error) {
-                this.log.error('Fehler beim API-Token-Abruf: ' + error.message);
-                return reject(error);
-            }
-
-            if (response.statusCode === 200 && body.token && body.idUser) {
-                const BearerToken = body.token;  // Der Bearer-Token
-                const idUser   = body.idUser; //idUser für urls
-				// Speichern des Tokens in den Einstellungen
-                this.BearerToken			= BearerToken;
-				this.setState('info.connection', true, true);
-				this.log.info('BearerToken erfolgreich geholt');
-                // Erfolgreich den API-Token und idUser zurückgeben
-				
-			   resolve({ BearerToken, idUser });
-            } else {
-                this.log.error('Fehler beim Abrufen des BearerToken: ' + response.statusCode);
-                reject(new Error('Invalid response'));
-            }
-        });
-    });
-}
-
-
-
-
-
 
 
 // async getLongTermApiToken(bearerToken, idUser) {
     // return new Promise((resolve, reject) => {
-        // // request.post({
-            // // url: `https://vrmapi.victronenergy.com/v2/users/${idUser}/accesstokens/create`,
-            // // headers: {
-                // // 'Authorization': `Bearer ${bearerToken}`,
-                // // 'Content-Type': 'application/json'
-            // // },
-            // // json: true,
-            // // body: {
-                // // "name": "ioBrokerAPIToken" // Du kannst einen spezifischen Label für den Token setzen
-            // // }
-        // // }, (error, response, body) => {
-            // // if (error) {
-                // // this.log.error('Fehler beim Erstellen des Langzeit-API-Tokens: ' + error.message);
-                // // return reject(error);
-            // // }
-
-
-			
+        // request.post({
+            // url: `https://vrmapi.victronenergy.com/v2/users/${idUser}/accesstokens/create`,
+            // headers: {
+                // 'Authorization': `Bearer ${bearerToken}`,
+                // 'Content-Type': 'application/json'
+            // },
+            // json: true,
+            // body: {
+                // "name": "ioBrokerAPIToken" // Du kannst einen spezifischen Label für den Token setzen
+            // }
+        // }, (error, response, body) => {
+            // if (error) {
+                // this.log.error('Fehler beim Erstellen des Langzeit-API-Tokens: ' + error.message);
+                // return reject(error);
+            // }
+		
 
             // if (response.statusCode === 200 && body.token) {
                 // const longTermApiToken = body.token; // Der Langzeit-API-Token
@@ -193,62 +132,7 @@ async getApiToken(username, password) {
 
 
 
-
-
-
-async getInstallationId(BearerToken, idUser) {
-    return new Promise((resolve, reject) => {
-        request.get({
-            url: `https://vrmapi.victronenergy.com/v2/users/${idUser}/installations`,
-            headers: {
-                'x-authorization': `Bearer ${this.BearerToken}`,
-                'Content-Type': 'application/json'
-            }
-        }, (error, response, body) => {
-            if (error) {
-                this.log.error('Fehler beim Abrufen der Installation-ID: ' + error.message);
-                return reject(error);
-            }
-
-            if (response.statusCode === 200) {
-                const data = JSON.parse(body);
-                if (data.records && data.records.length > 0) {
-                    const installations = data.records.map(record => ({
-                        id: record.idSite,
-                        name: record.name
-                    }));
-
-                    this.log.info(`Installationen erfolgreich abgerufen: ${installations.map(i => `${i.id}: ${i.name}`).join(', ')}`);
-                    
-                    resolve(installations);
-                } else {
-                    this.log.error('Keine Installationen gefunden');
-                    reject(new Error('No installations found'));
-                }
-            } else {
-                this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode);
-                reject(new Error('Invalid response'));
-            }
-        });
-    });
-}
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
- startPolling(BearerToken, installationIds, interval) {
+startPolling(BearerToken, installationIds, interval) {
     const pollData = (BearerToken, installationId, installationName) => {
         const url = `https://vrmapi.victronenergy.com/v2/installations/${installationId}/diagnostics?count=1000`;
 
@@ -270,8 +154,7 @@ async getInstallationId(BearerToken, idUser) {
                     this.log.info(`Request ok für Installation ID: ${installationId}`);
                     const data = JSON.parse(body);
                     if (data.records && Array.isArray(data.records)) {
-                        this.processVictronRecords(data.records, installationName); // Name mitgeben
-
+                        this.tools.processVictronRecords(data.records, installationName); // Name mitgeben
                         // Setze den Verbindungsstatus auf true bei erfolgreichem Request
                         this.setState('info.connection', true, true);
                     } else {
@@ -282,40 +165,30 @@ async getInstallationId(BearerToken, idUser) {
                 }
             } else if (response.statusCode === 401) {
                 
-            
-			
 			
 		//#################################################################################	
-			const { BearerToken, idUser } =  this.getApiToken(this.username, this.password);
-				//const  installations = await this.getInstallationId(apiToken, idUser);
-				
-			
-			
-					
+			const { BearerToken, idUser } =  this.vrm.getApiToken(this.username, this.password);
 				// Speichern der API-Daten in der Adapterkonfiguration
 				this.BearerToken				= BearerToken;
 				this.idUser 			= idUser;
-				// this.installationIds 	= installations;
-				
 				
 				this.log.info('Successfully fetched RENEW API token !!!');
 		
 		//###########################################################################	
-			
-			
-			
+		
 			
 			} else {
                 this.log.error('Fehlerhafte Antwort von der API: ' + response.statusCode + ' ' + url + ' ' + installationId);
-                // Logge die gesamte Antwort, um zu sehen, was zurückgegeben wird
+              // Logge die gesamte Antwort, um zu sehen, was zurückgegeben wird
                 this.log.info('Antwort des Langzeit-API-Token Requests: ' + JSON.stringify(response));
                 this.log.info('Response Body: ' + JSON.stringify(body));
             }
         });
     };
 
+
     // Funktion zur Abfrage für alle Installationen
-    const pollAllData = (apiToken) => {
+    const pollAllData = () => {
         if (!Array.isArray(installationIds) || installationIds.length === 0) {
             this.log.warn('Keine gültigen Installation IDs zum Abfragen.');
             return;
@@ -335,59 +208,7 @@ async getInstallationId(BearerToken, idUser) {
 }
 
 
-
-
-
-
-
-
-processVictronRecords(records,installationName) {
-    records.forEach(record => {
-        const dbusServiceType = record.dbusServiceType;
-        const description = record.description.replace(/[^a-zA-Z0-9-]/g, '_');
-        const rootnode    = installationName.replace(/[^a-zA-Z0-9-]/g, '_');
-		const basePath = `${rootnode}.${dbusServiceType}.${description}`;
-        
-        this.createDataPoints(record, basePath);
-    });
-}
-
-// Rekursive Methode zur Verarbeitung von Objekten
-createDataPoints(record, basePath) {
-    for (let key in record) {
-        if (key !== 'dbusServiceType' && key !== 'description') {
-            const dataPointName = `${basePath}.${key}`;
-            const value = record[key];
-
-            if (typeof value === 'object' && value !== null) {
-                // Falls der Wert ein Objekt ist, rufe die Funktion rekursiv auf
-                this.createDataPoints(value, dataPointName);
-            } else {
-                // Ansonsten den Datenpunkt erstellen
-                this.setObjectNotExistsAsync(dataPointName, {
-                    type: 'state',
-                    common: {
-                        name: key,
-                        type: typeof value,
-                        role: 'value',
-                        read: true,
-                        write: false
-                    },
-                    native: {}
-                });
-
-
-			
-                this.setState(dataPointName, { val: value, ack: true });
-            }
-        }
-    }
-}
-
-
-
-
-    onUnload(callback) {
+onUnload(callback) {
         try {
             if (this.pollingInterval) {
                 clearInterval(this.pollingInterval);
