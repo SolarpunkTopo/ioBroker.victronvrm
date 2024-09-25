@@ -1,7 +1,19 @@
 {
   "common": {
     "name": "victronvrm",
-    "version": "0.0.7",
+    "version": "0.0.9",
+    "supportCustoms": true,
+    "customs": {
+      "victronvrm": {
+        "enabled": {
+          "type": "checkbox",
+          "default": false,
+          "label": "Modbus-Abfrage aktivieren",
+          "description": "Aktiviere die Modbus-Abfrage für diesen Datenpunkt"
+        }
+      }
+    },
+    "title": "Victron VRM Portal",
     "titleLang": {
       "en": "Victron VRM Portal",
       "de": "Victron VRM-Portal"
@@ -32,10 +44,10 @@
     "compact": true,
     "mode": "daemon",
     "messagebox": true,
-	"connectionType": "cloud",
+    "connectionType": "cloud",
     "dataSource": "poll",
     "adminUI": {
-      "config": "json"  
+      "config": "json"
     },
     "dependencies": [
       {
@@ -49,12 +61,14 @@
     ]
   },
   "native": {
-    "apiKey": "",
-    "installationId": "",
-	"installationName": "",
+    "VrmApiToken": "",
+    "VenusIP": "",
+    "installationName": "",
     "username": "",
     "password": "",
-    "interval": 120
+    "interval": 120,
+	"interval2": 5
+	
   },
   "objects": [],
   "instanceObjects": [

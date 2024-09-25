@@ -1,46 +1,49 @@
 {
-    "type": "tabs",
-    "items": {
-        "_options1": {
-            "type": "panel",
-            "label": "VRM Portal Login",
-            "items": {
-                "username": {
-                    "type": "text",
-                    "label": "Username",
-                    "sm": 3
-                },
-                "password": {
-                    "type": "password",
-                    "label": "Passwort",
-                    "sm": 3
-                },
-                
-	
-                "interval": {
-					"type": "number",
-					"label": "Abfrageintervall (s)",
-					"required": true,
-					"min": 30,
-					"max": 600,
-					"step": 5,
-					"sm": 3
-					}
-               
-				
-            }
+  "type": "tabs",
+  "items": {
+    "_options1": {
+      "type": "panel",
+      "label": "VRM Portal Login",
+      "items": {
+        "username": {
+          "type": "text",
+          "label": "Username",
+          "sm": 3
         },
-        "_tab2": {
-            "type": "panel",
-            "label": "Anlagendaten",
-            "items": {}  
+        "password": {
+          "type": "password",
+          "label": "Passwort",
+          "sm": 3
         },
-        "_tab3": {
-            "type": "panel",
-            "label": "Anlagendaten2",
-            "items": {}  
+        "VrmApiToken": {
+          "type": "text",
+          "label": "API-Token des VRM Portals",
+          "sm": 3
+        },
+        "VenusIP": {
+          "type": "text",
+          "label": "IP Adresse der Venus/Cerbo CX",
+          "sm": 3
+        },
+        "interval": {
+          "type": "number",
+          "label": "Abfrageintervall (s)",
+          "min": 30,
+          "max": 600,
+          "step": 5,
+          "sm": 3
         }
+      }
+    },
+    "_tab2": {
+      "type": "panel",
+      "label": "Anlagendaten",
+      "items": {}
+    },
+    "_tab3": {
+      "type": "panel",
+      "label": "Anlagendaten2",
+      "items": {}
     }
+  }
 }
-
-

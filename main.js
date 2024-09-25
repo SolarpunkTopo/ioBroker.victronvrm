@@ -1,12 +1,15 @@
 'use strict';
 
-const utils = require('@iobroker/adapter-core');
-const request = require('request');
-const axios = require('axios').default;
+const utils 		= require('@iobroker/adapter-core');
+const request 		= require('request');
+const axios 		= require('axios').default;
+const ModbusRTU 	= require('modbus-serial');
 
+const VRM 			= require('./lib/libvrm.js');
+const TOOLS 		= require('./lib/vrmutils.js');
+const SQLiteDB 		= require('./lib/libdb.js'); // Importiere die SQLiteDB-Klasse
+const ModbusClient 	= require('./lib/libmodbus');
 
-const VRM = require('./lib/libvrm.js');
-const TOOLS = require('./lib/vrmutils.js');
 
 // Hauptadapter-Klasse
 class VictronVrmAdapter extends utils.Adapter {
@@ -17,13 +20,23 @@ class VictronVrmAdapter extends utils.Adapter {
             name: 'victronvrm',
         });
 
-        // Bindung der Funktionen
+        
+		// Initialisiere die SQLite-Datenbank
+        this.sqliteDB = new SQLiteDB(this, { dbPath: './db/sqlite.db' });
+		
+		// Bindung der Funktionen
         this.on('ready', this.onReady.bind(this));
         this.on('unload', this.onUnload.bind(this));
 		this.on('message', this.onMessage.bind(this));
-    
+		this.on('objectChange', this.onObjectChange.bind(this)); 
+	
+	// Other initializations
+        this.modbusPollingInterval = null; // Will hold the polling interval ID
+		
+	   //Objects
 	   this.vrm = new VRM(this); // VRM-Instanz erstellen
 	   this.tools = new TOOLS(this); // VRM-utils erstellen
+	   this.modbusClient = new ModbusClient(this);
 	}
 
 
@@ -31,14 +44,9 @@ class VictronVrmAdapter extends utils.Adapter {
         // Adapter ist bereit und startet
         this.log.info('Victron VRM Adapter gestartet.');
 
-
-		
-		
-		
-
         // API-Key und andere Einstellungen aus den Konfigurationen lesen
         // Initialisiere die Konfiguration
-		const apiKey = this.config.apiKey;
+		const VrmApiToken = this.config.VrmApiToken;
 		const username = this.config.username;
 		const password = this.config.password;
 		const interval = this.config.interval || 60;
@@ -47,7 +55,7 @@ class VictronVrmAdapter extends utils.Adapter {
 		
 		this.username  			= username;
 		this.password  			= password;
-		this.apiKey				= apiKey;
+		this.VrmApiToken		= VrmApiToken;
 		this.installations		= installations;
 
 
@@ -80,9 +88,94 @@ class VictronVrmAdapter extends utils.Adapter {
 	// Starte den API-Polling-Prozess
     await   this.startPolling(BearerToken, this.installationIds, (interval*1000));
     await	this.tools.setAlive();
+
+
+
+
+// Definiere den Datenpunkt, in den der Modbus-Wert gespeichert werden soll
+        const datapoint = 'TorstenPunk.battery.State_of_health.rawValue';
+    	this.modbusClient.startPolling(
+            '192.168.2.88', // IP-Adresse
+            502,            // Port
+            100,            // Slave-ID
+            843,            // Registeradresse
+            2000,          // Intervall in Millisekunden
+            datapoint,      // Datenpunkt
+            'uint16'        // Datentyp
+            // Optional: Endianness, Standard ist 'BE' (Big Endian)
+        );
+
+
+
+
+
+
+
+
+// Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
+    this.getObjectView('system', 'custom', {}, (err, doc) => {
+        if (!err && doc && doc.rows) {
+            doc.rows.forEach(row => {
+                const obj = row.value;
+                if (obj && obj.common && obj.common.custom && obj.common.custom[this.namespace]) {
+                    const customSettings = obj.common.custom[this.namespace];
+                    if (customSettings.enabled) {
+                        this.enabledDatapoints.add(row.id);
+                        this.startPollingForDatapoint(row.id, customSettings);
+                    }
+                }
+            });
+        }
+    });
+
+
+
+
+
 }
 
 
+
+
+onObjectChange(id, obj) {
+    if (obj) {
+        // Objekt wurde hinzugefügt oder geändert
+        if (obj.common && obj.common.custom && obj.common.custom[this.namespace]) {
+            const customSettings = obj.common.custom[this.namespace];
+            if (customSettings.enabled) {
+                if (!this.enabledDatapoints.has(id)) {
+                    this.enabledDatapoints.add(id);
+                    this.startPollingForDatapoint(id, customSettings);
+                }
+            } else {
+                if (this.enabledDatapoints.has(id)) {
+                    this.enabledDatapoints.delete(id);
+                    this.modbusClient.stopPollingForDatapoint(id);
+                }
+            }
+        }
+    } else {
+        // Objekt wurde gelöscht
+        if (this.enabledDatapoints.has(id)) {
+            this.enabledDatapoints.delete(id);
+            this.modbusClient.stopPollingForDatapoint(id);
+        }
+    }
+}
+
+startPollingForDatapoint(id, customSettings) {
+    // Ersetze diesen Teil durch die Logik, um die Parameter aus der SQLite-Datenbank oder den benutzerdefinierten Einstellungen zu holen
+    const ip = this.config.VenusIP; // Beispiel-IP
+    const port = 502;          // Beispiel-Port
+    const slaveId = 100;       // Beispiel-Slave-ID
+    const registerAddress = customSettings.registerAddress || 843; // Aus den benutzerdefinierten Einstellungen oder Placeholder
+    const interval = 10000;    // 10 Sekunden
+    const datapoint = id.replace(`${this.namespace}.`, '');
+    const dataType = customSettings.dataType || 'uint16'; // Aus den benutzerdefinierten Einstellungen oder Placeholder
+    const endian = 'BE'; // Oder 'LE', je nach Gerät
+
+    this.modbusClient.startPolling(ip, port, slaveId, registerAddress, interval, datapoint, dataType, endian);
+}
 
 
 
@@ -210,7 +303,12 @@ startPolling(BearerToken, installationIds, interval) {
 
 onUnload(callback) {
         try {
-            if (this.pollingInterval) {
+            
+			// Stoppe alle Modbus-Pollings
+        if (this.modbusClient) {
+            this.modbusClient.stopPolling();
+        }
+		if (this.pollingInterval) {
                 clearInterval(this.pollingInterval);
             }
             callback();
