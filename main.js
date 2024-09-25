@@ -49,7 +49,9 @@ class VictronVrmAdapter extends utils.Adapter {
 		const VrmApiToken = this.config.VrmApiToken;
 		const username = this.config.username;
 		const password = this.config.password;
-		const interval = this.config.interval || 60;
+		const interval = this.config.interval || 120;
+		const interval2 = this.config.interval2 || 10;
+		
 		const installations = this.config.installations;
 		const BearerToken  = this.config.BearerToken;
 		
@@ -139,15 +141,21 @@ class VictronVrmAdapter extends utils.Adapter {
 
 onObjectChange(id, obj) {
     if (obj) {
-        // Objekt wurde hinzugefügt oder geändert
+        // Objekt wurde geändert oder hinzugefügt
         if (obj.common && obj.common.custom && obj.common.custom[this.namespace]) {
             const customSettings = obj.common.custom[this.namespace];
             if (customSettings.enabled) {
+                // Einstellungen auslesen
+                const registerAddress = customSettings.registerAddress;
+                const dataType = customSettings.dataType;
+
+                // Starten des Pollings für den Datenpunkt
                 if (!this.enabledDatapoints.has(id)) {
                     this.enabledDatapoints.add(id);
                     this.startPollingForDatapoint(id, customSettings);
                 }
             } else {
+                // Polling für den Datenpunkt stoppen
                 if (this.enabledDatapoints.has(id)) {
                     this.enabledDatapoints.delete(id);
                     this.modbusClient.stopPollingForDatapoint(id);
@@ -163,19 +171,20 @@ onObjectChange(id, obj) {
     }
 }
 
-startPollingForDatapoint(id, customSettings) {
-    // Ersetze diesen Teil durch die Logik, um die Parameter aus der SQLite-Datenbank oder den benutzerdefinierten Einstellungen zu holen
-    const ip = this.config.VenusIP; // Beispiel-IP
-    const port = 502;          // Beispiel-Port
-    const slaveId = 100;       // Beispiel-Slave-ID
-    const registerAddress = customSettings.registerAddress || 843; // Aus den benutzerdefinierten Einstellungen oder Placeholder
-    const interval = 10000;    // 10 Sekunden
-    const datapoint = id.replace(`${this.namespace}.`, '');
-    const dataType = customSettings.dataType || 'uint16'; // Aus den benutzerdefinierten Einstellungen oder Placeholder
-    const endian = 'BE'; // Oder 'LE', je nach Gerät
 
-    this.modbusClient.startPolling(ip, port, slaveId, registerAddress, interval, datapoint, dataType, endian);
+startPollingForDatapoint(id, customSettings) {
+    const ip = '192.168.2.88'; // Beispiel-IP, kann auch aus Adaptereinstellungen kommen
+    const port = 502;
+    const slaveId = 100;
+
+    const registerAddress = customSettings.registerAddress || 0;
+    const dataType = customSettings.dataType || 'uint16';
+
+    const interval = 10000; // 10 Sekunden, kann ebenfalls angepasst werden
+    const datapoint = id.replace(`${this.namespace}.`, '');
+    this.modbusClient.startPolling(ip, port, slaveId, registerAddress, interval, datapoint, dataType);
 }
+
 
 
 

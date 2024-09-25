@@ -27,11 +27,20 @@
         },
         "interval": {
           "type": "number",
-          "label": "Abfrageintervall (s)",
+          "label": "Abfrageintervall VRM-Portal(s)",
           "min": 30,
           "max": 600,
           "step": 5,
           "sm": 3
+        },
+		 "interval2": {
+          "type"	: "number",
+          "label"	: "Abfrageintervall Modbus (s)",
+          "min"		:	2,
+		  "default"	:	5,
+          "max"		:	10,
+          "step"	:	1,
+          "sm"		: 	3
         }
       }
     },

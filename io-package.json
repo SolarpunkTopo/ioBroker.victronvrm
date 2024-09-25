@@ -47,7 +47,8 @@
     "connectionType": "cloud",
     "dataSource": "poll",
     "adminUI": {
-      "config": "json"
+      "config": "json",
+	  "custom": "json"
     },
     "dependencies": [
       {
