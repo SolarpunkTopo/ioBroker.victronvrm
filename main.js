@@ -37,6 +37,8 @@ class VictronVrmAdapter extends utils.Adapter {
 	   this.vrm = new VRM(this); // VRM-Instanz erstellen
 	   this.tools = new TOOLS(this); // VRM-utils erstellen
 	   this.modbusClient = new ModbusClient(this);
+	    // **Hier initialisieren wir enabledDatapoints**
+        this.enabledDatapoints = new Set();
 	}
 
 
@@ -95,17 +97,17 @@ class VictronVrmAdapter extends utils.Adapter {
 
 
 // Definiere den Datenpunkt, in den der Modbus-Wert gespeichert werden soll
-        const datapoint = 'TorstenPunk.battery.State_of_health.rawValue';
-    	this.modbusClient.startPolling(
-            '192.168.2.88', // IP-Adresse
-            502,            // Port
-            100,            // Slave-ID
-            843,            // Registeradresse
-            2000,          // Intervall in Millisekunden
-            datapoint,      // Datenpunkt
-            'uint16'        // Datentyp
+        // const datapoint = 'TorstenPunk.battery.State_of_health.rawValue';
+    	// this.modbusClient.startPolling(
+            // '192.168.2.88', // IP-Adresse
+            // 502,            // Port
+            // 100,            // Slave-ID
+            // 843,            // Registeradresse
+            // 2000,          // Intervall in Millisekunden
+            // datapoint,      // Datenpunkt
+            // 'uint16'        // Datentyp
             // Optional: Endianness, Standard ist 'BE' (Big Endian)
-        );
+        // );
 
 
 
@@ -114,14 +116,16 @@ class VictronVrmAdapter extends utils.Adapter {
 
 
 
-// Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
+ // Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
     this.getObjectView('system', 'custom', {}, (err, doc) => {
         if (!err && doc && doc.rows) {
             doc.rows.forEach(row => {
                 const obj = row.value;
                 if (obj && obj.common && obj.common.custom && obj.common.custom[this.namespace]) {
                     const customSettings = obj.common.custom[this.namespace];
-                    if (customSettings.enabled) {
+                    const isEnabled = !!customSettings.enabled; // Standardmäßige "aktiviert"-Checkbox
+
+                    if (isEnabled) {
                         this.enabledDatapoints.add(row.id);
                         this.startPollingForDatapoint(row.id, customSettings);
                     }
@@ -131,24 +135,22 @@ class VictronVrmAdapter extends utils.Adapter {
     });
 
 
-
-
-
-}
+this.subscribeObjects('*');
+} //ende onready
 
 
 
 
 onObjectChange(id, obj) {
-    if (obj) {
+    this.log.info(`onObjectChange wurde aufgerufen für Objekt ${id}`);
+	if (obj) {
+		 this.log.info(`Objekt ${id} wurde geändert oder hinzugefügt`);
         // Objekt wurde geändert oder hinzugefügt
         if (obj.common && obj.common.custom && obj.common.custom[this.namespace]) {
             const customSettings = obj.common.custom[this.namespace];
-            if (customSettings.enabled) {
-                // Einstellungen auslesen
-                const registerAddress = customSettings.registerAddress;
-                const dataType = customSettings.dataType;
+            const isEnabled = !!customSettings.enabled; // Standardmäßige "aktiviert"-Checkbox
 
+            if (isEnabled) {
                 // Starten des Pollings für den Datenpunkt
                 if (!this.enabledDatapoints.has(id)) {
                     this.enabledDatapoints.add(id);
@@ -163,7 +165,7 @@ onObjectChange(id, obj) {
             }
         }
     } else {
-        // Objekt wurde gelöscht
+        this.log.info(`Objekt ${id} wurde gelöscht`);
         if (this.enabledDatapoints.has(id)) {
             this.enabledDatapoints.delete(id);
             this.modbusClient.stopPollingForDatapoint(id);
@@ -172,17 +174,37 @@ onObjectChange(id, obj) {
 }
 
 
-startPollingForDatapoint(id, customSettings) {
-    const ip = '192.168.2.88'; // Beispiel-IP, kann auch aus Adaptereinstellungen kommen
-    const port = 502;
-    const slaveId = 100;
 
+
+startPollingForDatapoint(id, customSettings) {
+    const ip = this.config.VenusIP || '192.168.2.88'; // IP-Adresse aus den globalen Einstellungen
+    const port = 502; // Standard-Modbus-Port
+
+    const slaveId = customSettings.slaveId || 100;
     const registerAddress = customSettings.registerAddress || 0;
     const dataType = customSettings.dataType || 'uint16';
-
-    const interval = 10000; // 10 Sekunden, kann ebenfalls angepasst werden
+    const interval2 = (this.config.interval2 || 60) * 1000; // Intervall in Millisekunden
     const datapoint = id.replace(`${this.namespace}.`, '');
-    this.modbusClient.startPolling(ip, port, slaveId, registerAddress, interval, datapoint, dataType);
+
+    const useWebhook = customSettings.useWebhook || false;
+    const getVariableName = customSettings.getVariableName || '';
+    const webhookUrl = this.config.webhookUrl || '';
+
+	this.log.debug('startPollingForDatapoint '+ datapoint + ip+ ':' +port+ ' '+registerAddress+ ' ');
+
+    this.modbusClient.startPolling(
+        ip,
+        port,
+        slaveId,
+        registerAddress,
+        interval2,
+        datapoint,
+        dataType,
+        'BE', // Endianess
+        useWebhook,
+        getVariableName,
+        webhookUrl
+    );
 }
 
 
@@ -193,6 +215,25 @@ async onMessage(obj) {
    
 }
 
+
+
+
+getAuthorizationHeader() {
+    const headers = {};
+
+    if (this.config.VrmApiToken) {
+        headers['x-authorization'] = `Token ${this.config.VrmApiToken}`;
+    this.log.debug('ApiToken wird verwendet');
+	} else if (this.BearerToken) {
+        headers['x-authorization'] = `Bearer ${this.BearerToken}`;
+		this.log.debug('BearerToken wird verwendet');
+	} else {
+        this.log.error('Weder VrmApiToken noch BearerToken sind verfügbar. Authentifizierung fehlgeschlagen.');
+        // Optional: Fehler werfen oder Standard-Header zurückgeben
+    }
+
+    return headers;
+}
 
 
 
@@ -240,9 +281,7 @@ startPolling(BearerToken, installationIds, interval) {
 
         const options = {
             url: url,
-            headers: {
-                'x-authorization': `Bearer ${this.BearerToken}`
-            }
+             headers: this.getAuthorizationHeader()
         };
 
         request.get(options, (error, response, body) => {
