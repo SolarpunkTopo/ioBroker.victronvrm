@@ -41,6 +41,14 @@
           "step": 1,
           "sm": 3
         },
+		"interval3": {
+          "type": "number",
+          "label": "Intervall für Webhook Requests (s)",
+          "min": 10,
+          "max": 600,
+          "step": 1,
+          "sm": 3
+        },
 		"webhookUrl": {
           "type": "text",
           "label": "Webhook-URL",

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "victronvrm",
-    "version": "0.0.12",
+    "version": "0.0.14",
     "supportCustoms": true,
     "customs": {
       "victronvrm": {
@@ -68,7 +68,9 @@
     "username": "",
     "password": "",
     "interval": 120,
-	"interval2": 5
+	"interval2": 5,
+	"interval3": 30
+	
 	
   },
   "objects": [],
