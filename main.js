@@ -9,6 +9,7 @@ const VRM 			= require('./lib/libvrm.js');
 const TOOLS 		= require('./lib/vrmutils.js');
 const SQLiteDB 		= require('./lib/libdb.js'); // Importiere die SQLiteDB-Klasse
 const ModbusClient 	= require('./lib/libmodbus');
+const WebhookClient = require('./lib/libWebhook');
 
 
 // Hauptadapter-Klasse
@@ -37,6 +38,8 @@ class VictronVrmAdapter extends utils.Adapter {
 	   this.vrm = new VRM(this); // VRM-Instanz erstellen
 	   this.tools = new TOOLS(this); // VRM-utils erstellen
 	   this.modbusClient = new ModbusClient(this);
+	   this.webhookClient = new WebhookClient(this); // Neue Instanz von WebhookClient
+	   
 	    // **Hier initialisieren wir enabledDatapoints**
         this.enabledDatapoints = new Set();
 	}
@@ -56,35 +59,49 @@ class VictronVrmAdapter extends utils.Adapter {
 		const interval3 = this.config.interval2 || 30;
 		
 		const idUser	= this.config.idUser;
-		const installations = this.config.installations;
+		
 		const BearerToken  = this.config.BearerToken;
 		
 		this.username  			= username;
 		this.password  			= password;
 		this.VrmApiToken		= VrmApiToken;
-		this.installations		= installations;
+		
 		this.idUser				= idUser;
 
         // Wenn Einstellungen fehlen, Fehlermeldung ausgeben
-        if (!username || !password) {
+        if (!username && !password && !VrmApiToken) {
 				this.log.error('Benutzername und Passwort sind erforderlich.');
             return;
         }
 	
 	try {
+				
+				
+				
 				// API-Login und Abruf der API-Daten
-			if(!VrmApiToken || !idUser || !installations){	
+				
 				const { BearerToken, idUser } = await this.vrm.getApiToken(username, password);
-				const  installations = await this.vrm.getInstallationId(BearerToken, idUser);
-			}
-				
-				
-				// Speichern der API-Daten in der Adapterkonfiguration
+				this.updateConfig({ idUser: idUser });
+			
+			
+			
+			
+				 // idUser  = await this.vrm.getUserId();
+			
+			
+			
+			
 				this.BearerToken		= BearerToken;
 				this.idUser 			= idUser;
-				this.installationIds 	= installations;
-					this.log.info('Successfully fetched API token and installation ID.');
-					this.log.warn('Successfully fetched log term API token' + longTermApiToken);
+					
+				this.updateConfig({ idUser: idUser, BearerToken: BearerToken });
+			
+			
+				const  installations = await this.vrm.getInstallationId(BearerToken, idUser);
+				this.installations 	= installations;
+				
+				this.updateConfig({ installations: installations });
+								
 					
 			} catch (error) {
 					this.log.error('Error fetching API token or installation ID:', error);
@@ -92,51 +109,53 @@ class VictronVrmAdapter extends utils.Adapter {
 	
 	
 	// Starte den API-Polling-Prozess
-    await   this.vrm.startPolling(BearerToken, this.installationIds, (interval*1000));
+    await   this.vrm.startPolling(BearerToken, this.installations, (interval*1000));
     await	this.tools.setAlive();
 
 
 
 
-// Definiere den Datenpunkt, in den der Modbus-Wert gespeichert werden soll
-        // const datapoint = 'TorstenPunk.battery.State_of_health.rawValue';
-    	// this.modbusClient.startPolling(
-            // '192.168.2.88', // IP-Adresse
-            // 502,            // Port
-            // 100,            // Slave-ID
-            // 843,            // Registeradresse
-            // 2000,          // Intervall in Millisekunden
-            // datapoint,      // Datenpunkt
-            // 'uint16'        // Datentyp
-            // Optional: Endianness, Standard ist 'BE' (Big Endian)
-        // );
 
 
 
 
 
+// Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
+this.getObjectView('system', 'custom', {}, (err, doc) => {
+    if (!err && doc && doc.rows) {
+        doc.rows.forEach(row => {
+            const obj = row.value;
+            this.log.debug(`Verarbeite Objekt: ${row.id} - ${JSON.stringify(obj)} aktiviert in den settings`);
+            
+            // Prüfe, ob das Objekt direkt die benutzerdefinierten Einstellungen enthält
+            if (obj && obj[this.namespace]) {
+                const customSettings = obj[this.namespace];
+                const isEnabled = !!customSettings.enabled; // Standardmäßige "aktiviert"-Checkbox
 
-
-
- // Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
-    this.getObjectView('system', 'custom', {}, (err, doc) => {
-        if (!err && doc && doc.rows) {
-            doc.rows.forEach(row => {
-                const obj = row.value;
-               
-				if (obj && obj.common && obj.common.custom && obj.common.custom[this.namespace]) {
-                    const customSettings = obj.common.custom[this.namespace];
-                    const isEnabled = !!customSettings.enabled; // Standardmäßige "aktiviert"-Checkbox
-
-                    if (isEnabled) {
-                        this.enabledDatapoints.add(row.id);
-                        this.startPollingForDatapoint(row.id, customSettings);
-                    this.log.debug(id+ 'aktiviert in den settings');
-					}
+                if (isEnabled) {
+                    this.enabledDatapoints.add(row.id);
+                    this.modbusClient.startPollingForDatapoint(row.id, customSettings);
+                    this.webhookClient.startPollingWebhook(row.id, customSettings); // Falls erforderlich
+					this.log.debug(`${row.id} aktiviert in den settings`);
                 }
-            });
-        }
-    });
+            }
+            // // Alternative Struktur: Custom Settings direkt unter dem Objekt
+            // else if (obj && obj.enabled) { // Direktes 'enabled' Feld
+                // const isEnabled = !!obj.enabled;
+
+                // if (isEnabled) {
+                    // this.enabledDatapoints.add(row.id);
+                    // // Entferne die Custom Settings aus dem Objekt
+                    // const { enabled, ...customSettings } = obj;
+                    // this.modbusClient.startPollingForDatapoint(row.id, customSettings);
+                    // this.log.debug(`${row.id} aktiviert in den settings (direkt unter dem Objekt)`);
+                // }
+            // }
+        });
+    } else {
+        this.log.error(`Fehler beim Abrufen der Objekte: ${err}`);
+    }
+});
 
 
 this.subscribeObjects('*');
@@ -158,8 +177,8 @@ this.subscribeObjects('*');
 
 
 onObjectChange(id, obj) {
-    this.log.info(`onObjectChange wurde aufgerufen für Objekt ${id}`);
-
+    
+		
     if (obj) {
         // Überprüfen, ob das Objekt zu unserem Adapter gehört
         if (id.startsWith(`${this.namespace}.`)) {
@@ -173,20 +192,32 @@ onObjectChange(id, obj) {
                 this.log.debug(`enabledDatapoints.has(${id}): ${this.enabledDatapoints.has(id)}`);
 					
 					
+					if(customSettings.useWebhook===false) {
+							this.webhookClient.stopWebhookPolling(id); // Falls erforderlich
+					}
 					
+					if(customSettings.useWebhook===true) {
+							this.webhookClient.startPollingWebhook(id, customSettings);  // Falls erforderlich
+					}					
+						
+						
                 if (isEnabled) {
                     // Polling für den Datenpunkt starten
                     if (!this.enabledDatapoints.has(id)) {
                         this.enabledDatapoints.add(id);
-                        this.startPollingForDatapoint(id, customSettings);
-                        this.startPollingWebhook(id, customSettings); // Falls erforderlich
+                        this.modbusClient.startPollingForDatapoint(id, customSettings);
+                        this.webhookClient.startPollingWebhook(id, customSettings); // Falls erforderlich
                         this.log.info(`Polling für ${id} gestartet.`);
+						
+						
+						
+						
                     }
                 } else {
                     // Polling für den Datenpunkt stoppen
                     this.enabledDatapoints.delete(id);
                     this.modbusClient.stopPolling();
-                    this.stopWebhookPolling(id); // Falls erforderlich
+                    this.webhookClient.stopWebhookPolling(id); // Falls erforderlich
                     this.log.info(`Polling für ${id} gestoppt.`);
                 }
             } else {
@@ -194,7 +225,7 @@ onObjectChange(id, obj) {
                 this.log.info(`Keine benutzerdefinierten Einstellungen für ${id} vorhanden. Stoppe Polling.`);
                 this.enabledDatapoints.delete(id);
                 this.modbusClient.stopPolling();
-                this.stopWebhookPolling(id); // Falls erforderlich
+                this.webhookClient.stopWebhookPolling(id); // Falls erforderlich
             }
         }
     } else {
@@ -205,7 +236,7 @@ onObjectChange(id, obj) {
             // Polling für den Datenpunkt stoppen
             this.enabledDatapoints.delete(id);
             this.modbusClient.stopPolling();
-            this.stopWebhookPolling(id); // Falls erforderlich
+            this.webhookClient.stopWebhookPolling(id); // Falls erforderlich
             this.log.info(`Polling für ${id} gestoppt (Objekt gelöscht).`);
         }
     }
@@ -224,240 +255,55 @@ onObjectChange(id, obj) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-async startPollingForDatapoint(id, customSettings) {
-    
-	
-	// Überprüfen, ob der Datenpunkt mit 'rawValue' endet
-    if (!id.endsWith('rawValue')) {
-        this.log.warn(`Modbus-Polling wurde für Datenpunkt ${id} nicht gestartet, da er nicht mit 'rawValue' endet.`);
-        return;
-    }
-	
-	
-	
-	const ip = this.config.VenusIP || '192.168.2.88'; // IP-Adresse aus den globalen Einstellungen
-    const port = 502; // Standard-Modbus-Port
-    const slaveId = customSettings.slaveId || 100;
-    const interval2 = (this.config.interval2 || 60) * 1000; // Intervall in Millisekunden
-    const datapoint = id.replace(`${this.namespace}.`, '');
-
-    // Extrahiere basePath und key aus dem aktuellen Datenpunkt
-    const idParts = datapoint.split('.');
-    if (idParts.length < 2) {
-        this.log.error(`Ungültige Datenpunkt-ID: ${datapoint}`);
-        return;
-    }
-
-    // Angenommen, die Struktur ist victronvrm.0.basePath.key
-    const basePath = idParts.slice(0, -1).join('.'); // Alles außer dem letzten Teil
-    const key = idParts[idParts.length - 1]; // Letzter Teil der ID
-
-    // Konstruktion des Datenpunkts, von dem wir den Wert von dbusPath erhalten
-    const dbusPathDataPointId = `${this.namespace}.${basePath}.dbusPath`;
-
-    // Wert von dbusPath aus dem entsprechenden Datenpunkt lesen
-    let stateDbusPath;
-    try {
-        stateDbusPath = await this.getStateAsync(dbusPathDataPointId);
-    } catch (error) {
-        this.log.error(`Fehler beim Lesen des Zustands von ${dbusPathDataPointId}: ${error.message}`);
-        return;
-    }
-
-    if (!stateDbusPath || stateDbusPath.val == null) {
-        this.log.error(`dbusPath für Datenpunkt ${datapoint} nicht gefunden oder ungültig.`);
-        return;
-    }
-
-    const dbusPath = stateDbusPath.val;
-
-    // Vor der SQL-Abfrage: Tabellen in der Datenbank auflisten und ins Log schreiben
-    try {
-        const tablesQuery = "SELECT name FROM sqlite_master WHERE type='table';";
-        const tablesResult = await this.sqliteDB.query(tablesQuery);
-        this.log.debug(`Liste der Tabellen in der Datenbank: ${JSON.stringify(tablesResult)}`);
-    } catch (error) {
-        this.log.error(`Fehler beim Abfragen der Tabellennamen: ${error.message}`);
-    }
-
-    // Datenbankabfrage mit dbusPath
-    const sql = 'SELECT Address, Type FROM dbusdata WHERE "dbus-obj-path" = ?';
-    let dbResult;
-
-    try {
-        dbResult = await this.sqliteDB.query(sql, [dbusPath]);
-    } catch (error) {
-        this.log.error(`Fehler beim Abfragen der Datenbank für dbusPath ${dbusPath}: ${error.message}`);
-        return;
-    }
-
-    if (!dbResult || dbResult.length === 0) {
-        this.log.error(`Keine Daten in der Datenbank für dbus-obj-path ${dbusPath} gefunden.`);
-        return;
-    }
-
-    const registerAddress = dbResult[0].Address;
-    const dataType = dbResult[0].Type;
-
-    if (registerAddress == null || dataType == null) {
-        this.log.error(`Ungültige Daten aus der Datenbank für dbusPath ${dbusPath}.`);
-        return;
-    }
-
-
-// Speichern von registerAddress und dataType in den customSettings
-    try {
-        const obj = await this.getObjectAsync(id);
-        if (obj && obj.common && obj.common.custom && obj.common.custom[this.namespace]) {
-            obj.common.custom[this.namespace].registerAddress = registerAddress;
-            obj.common.custom[this.namespace].dataType = dataType;
-			obj.common.custom[this.namespace].dbusPath = dbusPath;
-            await this.setObjectAsync(id, obj);
-            this.log.debug(`registerAddress (${registerAddress}) und dataType (${dataType}) in customSettings für ${id} gespeichert.`);
-        }
-    } catch (error) {
-        this.log.error(`Fehler beim Speichern von registerAddress und dataType in customSettings für ${id}: ${error.message}`);
-    }
-
-
-
-    this.log.debug(`startPollingForDatapoint ${datapoint} ${ip}:${port} RegisterAddress: ${registerAddress}, DataType: ${dataType}`);
-
-    this.modbusClient.startPolling(
-        ip,
-        port,
-        slaveId,
-        registerAddress,
-        interval2,
-        datapoint,
-        dataType,
-        'BE' // Endianess
-    );
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-startPollingWebhook(id, customSettings) {
-    const useWebhook = customSettings.useWebhook || false;
-    const getVariableName = customSettings.getVariableName || '';
-    const webhookUrl = this.config.webhookUrl || '';
-    const interval3 = (this.config.interval3 || 60) * 1000; // Intervall in Millisekunden
-    const datapoint = id;
-
-    if (!useWebhook) {
-        this.log.debug(`Webhook für Datenpunkt ${datapoint} ist deaktiviert.`);
-        return;
-    }
-
-    // Prüfen, ob die erforderlichen Parameter vorhanden sind
-    if (!webhookUrl || !getVariableName) {
-        this.log.warn(`Webhook-URL oder Variablenname für Datenpunkt ${datapoint} nicht gesetzt.`);
-        return;
-    }
-
-    // Überprüfen, ob bereits ein Polling für diesen Webhook läuft
-    if (this.webhookIntervals && this.webhookIntervals[datapoint]) {
-        this.log.debug(`Webhook-Polling für Datenpunkt ${datapoint} läuft bereits.`);
-        return;
-    }
-
-    // Funktion zur Durchführung des Webhook-Aufrufs
-    const webhookFunction = async () => {
-        try {
-            // Aktuellen Wert des Datenpunkts lesen
-            const state = await this.getStateAsync(datapoint);
-            if (!state || state.val === null || state.val === undefined) {
-                this.log.warn(`Kein gültiger Wert für Datenpunkt ${datapoint} vorhanden.`);
-                return;
-            }
-
-            // Webhook-URL mit Query-Parameter erstellen
-            const url = `${webhookUrl}?${encodeURIComponent(getVariableName)}=${encodeURIComponent(state.val)}`;
-
-            // HTTP GET-Request ausführen
-            const response = await axios.get(url);
-
-            this.log.debug(`Webhook für Datenpunkt ${datapoint} aufgerufen. Antwortstatus: ${response.status}`);
-        } catch (error) {
-            this.log.error(`Fehler beim Aufrufen des Webhooks für Datenpunkt ${datapoint}: ${error.message}`);
-        }
-    };
-
-    // Intervall für den Webhook-Aufruf starten
-    if (!this.webhookIntervals) {
-        this.webhookIntervals = {};
-    }
-    this.webhookIntervals[datapoint] = setInterval(webhookFunction, interval3);
-
-    // Sofortigen ersten Aufruf durchführen
-    webhookFunction();
-}
-
-
-
-stopWebhookPolling(datapoint) {
-    if (this.webhookIntervals && this.webhookIntervals[datapoint]) {
-        clearInterval(this.webhookIntervals[datapoint]);
-        delete this.webhookIntervals[datapoint];
-        this.log.info(`Webhook-Polling für Datenpunkt ${datapoint} gestoppt.`);
-    }
-}
-
-
-
-
 async onMessage(obj) {
    
 }
 
 
-
+updateConfig(newConfig) {
+        // Aktualisiere die Adapterkonfiguration
+        this.extendForeignObject('system.adapter.' + this.namespace, {
+            native: {
+                ...this.config,
+                ...newConfig
+            }
+        });
+    }
 
 
 
 onUnload(callback) {
     try {
-        // Stoppe das API-Polling
-        if (this.pollingInterval) {
-            clearInterval(this.pollingInterval);
-            this.pollingInterval = null;
+        this.log.info('Adapter wird beendet...');
+
+        // Modbus-Polling stoppen
+        if (this.modbusClient) {
+            this.modbusClient.stopAllPolling();
+            this.log.info('Alle Modbus-Polling-Intervalle wurden gestoppt.');
         }
 
-        // Stoppe Modbus-Polling für Datenpunkte
-        if (this.enabledDatapoints) {
-            this.enabledDatapoints.forEach(id => {
-                this.modbusClient.stopPollingForDatapoint(id);
-                this.stopWebhookPolling(id);
-            });
-            this.enabledDatapoints.clear();
+        // Webhook-Polling stoppen
+        if (this.webhookClient) {
+            this.webhookClient.stopAllWebhookPolling();
+            this.log.info('Alle Webhook-Polling-Intervalle wurden gestoppt.');
         }
 
-        // Weitere Bereinigungen...
+        // VRM-Polling stoppen (falls verwendet)
+        if (this.vrmClient) {
+            this.vrmClient.stopAllPolling();
+            this.log.info('Alle VRM-Polling-Intervalle wurden gestoppt.');
+        }
 
+        // Datenbankverbindung schließen
+        if (this.sqliteDB) {
+            this.sqliteDB.close();
+            this.log.info('Datenbankverbindung wurde geschlossen.');
+        }
+
+        this.log.info('Adapter wurde erfolgreich entladen.');
         callback();
     } catch (e) {
-        this.log.error(`Fehler beim Entladen: ${e}`);
+        this.log.error(`Fehler beim Entladen des Adapters: ${e.message}`);
         callback();
     }
 }

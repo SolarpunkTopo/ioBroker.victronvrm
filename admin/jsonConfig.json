@@ -21,10 +21,12 @@
           "sm": 3
         },
         "VenusIP": {
-          "type": "text",
+          "newline": true,
+		  "type": "text",
           "label": "IP Adresse der Venus/Cerbo GX",
           "sm": 3
         },
+		
         "interval": {
           "type": "number",
           "label": "Abfrageintervall (s)",
@@ -57,10 +59,20 @@
         }
       }
     },
-    "_tab2": {
+    
+	"_tab2": {
       "type": "panel",
       "label": "Anlagendaten",
-      "items": {}
+      "items": {
+		"installationsIDs": {
+			"type": "text",
+			"label": "Installation IDs",
+			"default": "",
+			"description": "Gib die Installation IDs als kommagetrennte Liste ein, z.B. id1,id2,id3"
+		},
+	
+	}
+	
     },
     "_tab3": {
       "type": "panel",
