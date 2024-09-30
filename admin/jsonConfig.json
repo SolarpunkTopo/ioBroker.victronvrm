@@ -20,6 +20,13 @@
           "label": "API-Token des VRM Portals",
           "sm": 3
         },
+			"idUser": {
+          "type": "number",
+		  "readonly": true,
+          "label": "(Optional) USER-ID des VRM Portals",
+          "sm": 3
+        },
+
         "VenusIP": {
           "newline": true,
 		  "type": "text",

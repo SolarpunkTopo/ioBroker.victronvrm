@@ -23,7 +23,7 @@ class VictronVrmAdapter extends utils.Adapter {
 
         
 		// Initialisiere die SQLite-Datenbank
-        this.sqliteDB = new SQLiteDB(this, { dbPath: './db/victronDB.db' });
+        this.sqliteDB = new SQLiteDB(this, { dbPath: './db/victronDBV02.db' });
 		
 		// Bindung der Funktionen
         this.on('ready', this.onReady.bind(this));
@@ -70,7 +70,7 @@ class VictronVrmAdapter extends utils.Adapter {
 
         // Wenn Einstellungen fehlen, Fehlermeldung ausgeben
         if (!username && !password && !VrmApiToken) {
-				this.log.error('Benutzername und Passwort sind erforderlich.');
+				this.log.error('Benutzername und Passwort oder VrmApiToken sind erforderlich.');
             return;
         }
 	
@@ -78,18 +78,22 @@ class VictronVrmAdapter extends utils.Adapter {
 				
 				
 				
+		if((idUser==0 || !idUser) && !VrmApiToken) {			
 				// API-Login und Abruf der API-Daten
-				
 				const { BearerToken, idUser } = await this.vrm.getApiToken(username, password);
-				this.updateConfig({ idUser: idUser });
+		} else {
+			
+		if((idUser==0 || !idUser)) {	
+			idUser  = await this.vrm.getUserId();
+		}
+		
+		}
 			
 			
+				
 			
 			
-				 // idUser  = await this.vrm.getUserId();
-			
-			
-			
+				
 			
 				this.BearerToken		= BearerToken;
 				this.idUser 			= idUser;

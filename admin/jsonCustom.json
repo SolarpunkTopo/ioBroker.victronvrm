@@ -1,0 +1,86 @@
+{
+  "type": "panel",
+  "items": {
+    "slaveId": {
+      "type": "number",
+	   "readonly": true,
+      "min": 1,
+      "max": 247,
+      "default": 100,
+      "label": "Slave-ID",
+      "description": "Die Slave-ID des Modbus-Geräts",
+      "visible": "customEnabled === true"
+    },
+    "dbusPath": {
+      "type": "text",
+      "default": "",
+	   "readonly": true,
+      "label": "dbusPath",
+      "description": "Der dbus-Pfad des Datenpunkts",
+      "visible": "customEnabled === true && objectID.endsWith('rawValue')"
+    },
+	"registerAddress": {
+      "type": "number",
+	   "readonly": true,
+      "min": 0,
+      "max": 65535,
+      "default": 0,
+      "label": "Registeradresse",
+      "description": "Die Modbus-Registeradresse für diesen Datenpunkt",
+      "visible": "customEnabled === true && objectID.endsWith('rawValue')"
+    },
+	"Scalefactor": {
+      "type": "number",
+	   "readonly": true,
+      "min": 1,
+      "max": 1000,
+      "default": 0,
+      "label": "Skalierungsfaktor",
+      "description": "optional: Faktor von Modbus vorgegeben",
+      "visible": "customEnabled === true && objectID.endsWith('rawValue')"
+    },
+	"writable": {
+		"type": "text",
+		"default":"no",
+		"label": "Wert beschreibbar für Modbus Ja/Nein",
+		"visible": "customEnabled === true && objectID.endsWith('rawValue')"
+	},
+    "dataType": {
+      "type": "select",
+	   "readonly": true,
+      "options": [
+    { "value": "uint16", "label": "uint16" },
+    { "value": "int16", "label": "int16" },
+    { "value": "uint32", "label": "uint32" },
+    { "value": "int32", "label": "int32" },
+    { "value": "float32", "label": "float32" },
+    { "value": "string", "label": "string" }
+  ],
+      "default": "uint16",
+      "label": "Datentyp",
+      "description": "Der Datentyp für diesen Datenpunkt",
+      "visible": "customEnabled === true && objectID.endsWith('rawValue')"
+    },
+    "_webhookSection": {
+      "type": "panel",
+      "label": "Webhook-Einstellungen",
+      "items": {
+        "useWebhook": {
+          "type": "checkbox",
+          "default": false,
+          "label": "Webhook verwenden",
+          "description": "Aktiviere den Webhook für diesen Datenpunkt",
+          "visible": "customEnabled === true"
+        },
+        "getVariableName": {
+          "type": "text",
+          "default": "",
+          "label": "Variablenname für Webhook",
+          "description": "Der Variablenname, der an den Webhook übergeben wird",
+          "visible": "customEnabled === true && useWebhook === true"
+        }
+      },
+      "visible": "customEnabled === true"
+    }
+  }
+}
