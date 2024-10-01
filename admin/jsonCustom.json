@@ -39,6 +39,11 @@
       "description": "optional: Faktor von Modbus vorgegeben",
       "visible": "customEnabled === true && objectID.endsWith('rawValue')"
     },
+	"dbusunit": {
+		"type": "text",
+		"label": "Einheit für Wert",
+		"visible": "customEnabled === true && objectID.endsWith('rawValue')"
+	},
 	"writable": {
 		"type": "text",
 		"default":"no",

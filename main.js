@@ -81,10 +81,14 @@ class VictronVrmAdapter extends utils.Adapter {
 		if((idUser==0 || !idUser) && !VrmApiToken) {			
 				// API-Login und Abruf der API-Daten
 				const { BearerToken, idUser } = await this.vrm.getApiToken(username, password);
+				
 		} else {
 			
 		if((idUser==0 || !idUser)) {	
 			idUser  = await this.vrm.getUserId();
+			this.log.error('iduser '+ idUser + 'wurde per VrmApiToken geholt!');
+			this.updateConfig({idUser: idUser});
+		
 		}
 		
 		}
@@ -98,18 +102,22 @@ class VictronVrmAdapter extends utils.Adapter {
 				this.BearerToken		= BearerToken;
 				this.idUser 			= idUser;
 					
-				this.updateConfig({ idUser: idUser, BearerToken: BearerToken });
+				
 			
 			
 				const  installations = await this.vrm.getInstallationId(BearerToken, idUser);
 				this.installations 	= installations;
 				
-				this.updateConfig({ installations: installations });
+				
 								
 					
 			} catch (error) {
 					this.log.error('Error fetching API token or installation ID:', error);
 			}
+	
+	
+	
+	this.updateConfig({idUser: idUser});
 	
 	
 	// Starte den API-Polling-Prozess
