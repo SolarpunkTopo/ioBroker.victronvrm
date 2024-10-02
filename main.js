@@ -56,11 +56,11 @@ class VictronVrmAdapter extends utils.Adapter {
 		const password = this.config.password;
 		const interval = this.config.interval || 240;
 		const interval2 = this.config.interval2 || 10;
-		const interval3 = this.config.interval2 || 30;
+		const interval3 = this.config.interval3 || 30;
 		
-		const idUser	= this.config.idUser;
+		let idUser	= this.config.idUser;
 		
-		const BearerToken  = this.config.BearerToken;
+		let BearerToken  = this.config.BearerToken;
 		
 		this.username  			= username;
 		this.password  			= password;
@@ -74,47 +74,51 @@ class VictronVrmAdapter extends utils.Adapter {
             return;
         }
 	
-	try {
+	
+	try {			
 				
 				
+		if ((!idUser || idUser === 0) && !VrmApiToken) {
+            // API-Login und Abruf der API-Daten
+            const result = await this.vrm.getApiToken(username, password);
+            BearerToken = result.BearerToken;
+            idUser = result.idUser;
+
+            // Speichere idUser und BearerToken in separaten Zuständen
+            await this.setStateAsync('native.idUser', { val: idUser, ack: true });
+            await this.setStateAsync('native.BearerToken', { val: BearerToken, ack: true });
+
+        } else {
+            if (!idUser || idUser === 0) {
+                // Hole idUser aus der VRM API
+                idUser = await this.vrm.getUserId();
 				
-		if((idUser==0 || !idUser) && !VrmApiToken) {			
-				// API-Login und Abruf der API-Daten
-				const { BearerToken, idUser } = await this.vrm.getApiToken(username, password);
-				
-		} else {
-			
-		if((idUser==0 || !idUser)) {	
-			idUser  = await this.vrm.getUserId();
-			this.log.error('iduser '+ idUser + 'wurde per VrmApiToken geholt!');
-			this.updateConfig({idUser: idUser});
+                
+				this.log.warn( 'iuser geholt:' + idUser);
+			}
+        }
 		
-		}
+		// Hole Installationen basierend auf BearerToken und idUser
+        
+		this.installations = await this.vrm.getInstallationId(BearerToken, idUser);
+        
+	
 		
-		}
-			
-			
-				
-			
-			
-				
-			
-				this.BearerToken		= BearerToken;
-				this.idUser 			= idUser;
-					
-				
-			
-			
-				const  installations = await this.vrm.getInstallationId(BearerToken, idUser);
-				this.installations 	= installations;
-				
-				
-								
-					
-			} catch (error) {
+		// Aktualisiere Adapter-Instanzvariablen mit den neuen Werten
+        this.BearerToken = BearerToken;
+        this.idUser = idUser;
+
+        
+
+	} catch (error) {
 					this.log.error('Error fetching API token or installation ID:', error);
 			}
+       
+        
+				
 	
+			
+		
 	
 	
 	this.updateConfig({idUser: idUser});
