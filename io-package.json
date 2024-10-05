@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "victronvrm",
-    "version": "0.0.18",
+    "version": "0.0.19",
     "supportCustoms": true,
     "customs": {
       "victronvrm": {
