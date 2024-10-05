@@ -105,7 +105,7 @@ class VictronVrmAdapter extends utils.Adapter {
                 // Hole idUser aus der VRM API
                 idUser = await this.vrm.getUserId();
 				
-                
+                	this.updateConfig({idUser: idUser});
 				this.log.warn( 'iuser geholt:' + idUser);
 			}
         }
@@ -133,7 +133,7 @@ class VictronVrmAdapter extends utils.Adapter {
 		
 	
 	
-	this.updateConfig({idUser: idUser});
+
 	
 	
 	// Starte den API-Polling-Prozess
@@ -148,42 +148,42 @@ class VictronVrmAdapter extends utils.Adapter {
 
 
 
-// Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
-this.getObjectView('system', 'custom', {}, (err, doc) => {
-    if (!err && doc && doc.rows) {
-        doc.rows.forEach(row => {
-            const obj = row.value;
-            this.log.debug(`Verarbeite Objekt: ${row.id} - ${JSON.stringify(obj)} aktiviert in den settings`);
+// // Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
+// this.getObjectView('system', 'custom', {}, (err, doc) => {
+    // if (!err && doc && doc.rows) {
+        // doc.rows.forEach(row => {
+            // const obj = row.value;
+            // this.log.debug(`Verarbeite Objekt: ${row.id} - ${JSON.stringify(obj)} aktiviert in den settings`);
             
-            // Prüfe, ob das Objekt direkt die benutzerdefinierten Einstellungen enthält
-            if (obj && obj[this.namespace]) {
-                const customSettings = obj[this.namespace];
-                const isEnabled = !!customSettings.enabled; // Standardmäßige "aktiviert"-Checkbox
-
-                if (isEnabled) {
-                    this.enabledDatapoints.add(row.id);
-                    this.modbusClient.startPollingForDatapoint(row.id, customSettings);
-                    this.webhookClient.startPollingWebhook(row.id, customSettings); // Falls erforderlich
-					this.log.debug(`${row.id} aktiviert in den settings`);
-                }
-            }
-            // // Alternative Struktur: Custom Settings direkt unter dem Objekt
-            // else if (obj && obj.enabled) { // Direktes 'enabled' Feld
-                // const isEnabled = !!obj.enabled;
+            // // Prüfe, ob das Objekt direkt die benutzerdefinierten Einstellungen enthält
+            // if (obj && obj[this.namespace]) {
+                // const customSettings = obj[this.namespace];
+                // const isEnabled = !!customSettings.enabled; // Standardmäßige "aktiviert"-Checkbox
 
                 // if (isEnabled) {
                     // this.enabledDatapoints.add(row.id);
-                    // // Entferne die Custom Settings aus dem Objekt
-                    // const { enabled, ...customSettings } = obj;
                     // this.modbusClient.startPollingForDatapoint(row.id, customSettings);
-                    // this.log.debug(`${row.id} aktiviert in den settings (direkt unter dem Objekt)`);
+                    // this.webhookClient.startPollingWebhook(row.id, customSettings); // Falls erforderlich
+					// this.log.debug(`${row.id} aktiviert in den settings`);
                 // }
             // }
-        });
-    } else {
-        this.log.error(`Fehler beim Abrufen der Objekte: ${err}`);
-    }
-});
+            // // // Alternative Struktur: Custom Settings direkt unter dem Objekt
+            // // else if (obj && obj.enabled) { // Direktes 'enabled' Feld
+                // // const isEnabled = !!obj.enabled;
+
+                // // if (isEnabled) {
+                    // // this.enabledDatapoints.add(row.id);
+                    // // // Entferne die Custom Settings aus dem Objekt
+                    // // const { enabled, ...customSettings } = obj;
+                    // // this.modbusClient.startPollingForDatapoint(row.id, customSettings);
+                    // // this.log.debug(`${row.id} aktiviert in den settings (direkt unter dem Objekt)`);
+                // // }
+            // // }
+        // });
+    // } else {
+        // this.log.error(`Fehler beim Abrufen der Objekte: ${err}`);
+    // }
+// });
 
 
 
