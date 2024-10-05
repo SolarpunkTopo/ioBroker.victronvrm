@@ -122,7 +122,7 @@ class VictronVrmAdapter extends utils.Adapter {
                 if (!err && doc && doc.rows) {
                     doc.rows.forEach(row => {
                         const obj = row.value;
-                        this.log.debug(`Verarbeite Objekt: ${row.id} - ${JSON.stringify(obj)} aktiviert in den settings`);
+                        
 
                         // Check if the object contains custom settings for this adapter
                         if (obj && obj[this.namespace]) {
@@ -155,6 +155,10 @@ class VictronVrmAdapter extends utils.Adapter {
                 .catch(err => this.log.error(`Heartbeat error: ${err.message}`));
         }, 60000); // 60,000 ms = 1 minute
     }
+
+
+
+
 
     async onUnload(callback) {
         try {
@@ -200,6 +204,8 @@ class VictronVrmAdapter extends utils.Adapter {
             callback();
         }
     }
+
+
 
     onObjectChange(id, obj) {
         if (obj) {
