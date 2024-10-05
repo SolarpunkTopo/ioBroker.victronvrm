@@ -149,7 +149,7 @@ class VictronVrmAdapter extends utils.Adapter {
 
 
 // Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
-await this.getObjectView('system', 'custom', {}, (err, doc) => {
+this.getObjectView('system', 'custom', {}, (err, doc) => {
     if (!err && doc && doc.rows) {
         doc.rows.forEach(row => {
             const obj = row.value;
