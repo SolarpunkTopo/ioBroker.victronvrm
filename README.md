@@ -22,9 +22,26 @@ IN WORK! NO RELEASE
 
 
 
+## [0.0.17] - 2024-09-30
 
+### ✅ Added
+- **VRM API Integration:** Successfully fetches and processes data from the Victron VRM portal.
+- **Automatic Modbus Register Address Search:** Automatically discovers and maps Modbus register addresses based on data retrieved from the VRM portal.
+- **Custom Settings Auto-Fill:** Automatically populates custom settings for each detected data point, simplifying configuration.
+- **Optional Webhook Functionality:** Enables users to configure webhook URLs for real-time notifications and integrations with external services like IFTTT and Zapier.
+- **Data Monitoring:** Continuously monitors Victron Energy devices, providing up-to-date energy metrics within ioBroker.
 
+### ⚠️ Important Notes
+- **Large Data Volume from VRM Portal:** The adapter retrieves a substantial amount of data from the VRM portal. Users should be aware that this may result in high memory usage and increased network traffic. It is recommended to monitor system performance and adjust polling intervals (`interval`) accordingly to optimize performance.
 
+### 🛠️ Known Issues
+- **Performance Optimization Needed:** Due to the large data volume, further optimization is required to ensure efficient data handling and minimal impact on system resources.
+- **Incomplete Error Handling:** Some edge cases and error scenarios are not yet fully handled. Users might encounter unexpected behaviors under certain conditions.
+
+### 🚧 Under Development
+- **Enhanced Data Filtering:** Implementing more granular data filtering options to allow users to select specific data points of interest.
+- **Advanced Webhook Features:** Adding support for more complex webhook configurations and multiple webhook endpoints.
+- **User Interface Improvements:** Enhancing the adapter’s configuration interface for better usability and clarity.
 
 
 
@@ -39,13 +56,13 @@ IN WORK! NO RELEASE
 **This adapter is in the early stages of development and is actively being worked on.** Features and functionalities may change, and the adapter may not be fully stable. Use it at your own risk and contribute to its improvement!
 
 ## **🔍 Short Summary**
-The **Victron VRM Adapter** for **ioBroker** seamlessly integrates your Victron Energy devices with the ioBroker ecosystem. It leverages the Victron Remote Management (VRM) API to monitor and control your energy systems, utilizing Modbus for efficient communication and an SQLite database for reliable data storage. Additionally, the adapter offers optional webhook functionality for extended automation capabilities.
+The **Victron VRM Adapter** for **ioBroker** seamlessly integrates your Victron Energy devices with the ioBroker ecosystem. It leverages the Victron Remote Management (VRM) API to monitor and control your energy systems, utilizing Modbus for efficient communication. Additionally, the adapter offers optional webhook functionality for extended automation capabilities.
 
 ### **Key Features:**
-- **Automatic Modbus Register Address Search:** Automatically discovers and maps Modbus register addresses from the integrated SQLite database.
+- **Automatic Modbus Register Address Search:** Automatically discovers and maps Modbus register addresses.
 - **Custom Settings Auto-Fill:** Simplifies configuration by automatically populating custom settings based on detected data points.
 - **Optional Webhook Integration:** Enhance your setup with webhooks for real-time notifications and integrations.
-- **SQLite Database Integration:** Reliable and efficient data storage for all your energy system metrics.
+- **Reliable Data Monitoring:** Continuously monitors your Victron devices to provide up-to-date energy metrics.
 
 ## **🛠 Detailed Setup and Configuration Guide**
 
@@ -88,38 +105,42 @@ The **Victron VRM Adapter** for **ioBroker** seamlessly integrates your Victron 
    - If not using an API token, provide your **Victron VRM** **username** and **password**.
 
 3. **Polling Intervals:**
-   - **Interval:** Set the main polling interval in seconds (default: 240).
-   - **Interval2:** Secondary polling interval for specific tasks (default: 10).
-   - **Interval3:** Tertiary polling interval for additional processes (default: 30).
+   - **VRM Polling Interval (`interval`):**  
+     Set the interval in seconds for querying the **VRM portal** to fetch the latest energy system data.  
+     **Default:** 240 seconds  
+     **Purpose:** Ensures that the adapter regularly updates data from the VRM portal to keep your energy metrics current.
+   
+   - **Modbus Polling Interval (`interval2`):**  
+     Set the interval in seconds for polling **Modbus registers** to read real-time data from your Victron devices.  
+     **Default:** 10 seconds  
+     **Purpose:** Allows the adapter to continuously monitor and retrieve data from Modbus-enabled devices, ensuring up-to-date information.
+   
+   - **Webhook Polling Interval (`interval3`):**  
+     Set the interval in seconds for invoking the **webhook URLs** to send real-time notifications or trigger external integrations.  
+     **Default:** 30 seconds  
+     **Purpose:** Facilitates timely communication with external services or automation platforms through webhooks.
 
-4. **Database Path:**
-   - The SQLite database file (`victronDBV02.db`) is located in the `./db/` directory within the adapter folder.
-   - Ensure that this path is correctly set and that the adapter has read/write permissions.
-
-5. **Webhook Configuration (Optional):**
-   - Enable and configure webhooks for real-time integrations and notifications.
+4. **Webhook Configuration (Optional):**
+   - **Enable Webhook:** Toggle to enable or disable webhook functionality.
    - **Webhook URL:** Specify the endpoint to receive webhook events.
-   - **Events to Trigger:** Select which events should trigger a webhook notification.
+   - **Events to Trigger:** Select which events should trigger a webhook notification (e.g., data point changes, system alerts).
 
 #### **Automatic Modbus Register Address Search:**
 
-The adapter automatically scans the SQLite database (`victronDBV02.db`) to discover available Modbus registers associated with your Victron devices. This process populates the custom settings for each detected data point, streamlining the setup process.
+The adapter automatically scans available Modbus registers associated with your Victron devices. This process populates the custom settings for each detected data point, streamlining the setup process.
 
 **Steps:**
 
-1. **Ensure Database Integrity:**
-   - Verify that the `victronDBV02.db` file is present in the `./db/` directory.
-   - The adapter will create the database file if it doesn't exist during the initial setup.
-
-2. **Automatic Discovery:**
-   - Upon starting, the adapter reads the database to identify available Modbus registers.
+1. **Automatic Discovery:**
+   - Upon starting, the adapter scans and identifies available Modbus registers.
    - Custom settings for each data point are auto-populated based on the discovered registers, including parameters like `slaveId`, `registerAddress`, and `dataType`.
 
-3. **Manual Verification:**
-   - Access the database using an SQLite viewer to inspect the discovered registers.
+2. **Manual Verification:**
+   - Access the adapter's data points within the ioBroker interface to inspect the discovered registers.
    - Ensure that the custom settings align with your Modbus device specifications.
 
 ![Modbus Register Discovery](./images/modbus-discovery.png)
+*Figure 1: Modbus Register Discovery Process*
 
 ### **3. Custom Settings Auto-Fill**
 
@@ -158,81 +179,61 @@ Webhooks provide a mechanism to receive real-time notifications and integrate wi
 Once configured, the adapter will send HTTP POST requests to the specified webhook URL whenever the selected events occur. This enables seamless integration with services like **IFTTT**, **Zapier**, or custom automation scripts.
 
 ![Webhook Configuration](./images/webhook-configuration.png)
-
-### **5. Preventing Self-Triggered Writes**
-
-To avoid infinite loops where the adapter's own updates trigger additional write actions, the adapter employs a mechanism to differentiate between external and internal state changes.
-
-**How It Works:**
-
-- **Internal Updates:** When the adapter updates a data point, it marks the state as being updated internally.
-- **State Change Handler:** The `onStateChange` handler checks if the change originated from the adapter itself and, if so, ignores it to prevent recursive writes.
-
-**Example Scenario:**
-
-1. **External Update:** A user changes a writable data point via the ioBroker interface.
-2. **Adapter Action:** The `onStateChange` handler detects the change and writes the new value to the corresponding Modbus register.
-3. **Internal Confirmation:** After writing, the adapter updates the state internally.
-4. **Loop Prevention:** The internal update is recognized and ignored by the `onStateChange` handler, preventing an infinite loop.
-
-![Self-Trigger Prevention](./images/self-trigger-prevention.png)
-
-### **6. Troubleshooting**
-
-#### **Common Issues:**
-
-1. **Database File Not Found:**
-   - **Solution:** Ensure that the `victronDBV02.db` file is present in the `./db/` directory. If not, the adapter should create it automatically. Check file permissions to ensure the adapter can read and write to the directory.
-
-2. **Modbus Communication Errors:**
-   - **Solution:** Verify the Modbus slave ID and register addresses in the custom settings. Ensure that the Modbus device is reachable and correctly configured.
-
-3. **Webhook Failures:**
-   - **Solution:** Check the webhook URL for correctness and ensure that the endpoint is accessible from the adapter's host machine. Review adapter logs for any HTTP errors.
-
-4. **Adapter Not Starting:**
-   - **Solution:** Review the adapter logs for any initialization errors, especially related to missing dependencies or incorrect configurations.
-
-#### **Checking Logs:**
-- Access the **ioBroker Admin Interface**.
-- Navigate to **"Log"** to view detailed logs from the Victron VRM Adapter.
-- Look for any error messages or warnings that can provide insights into issues.
-
-### **7. Contribution and Support**
-
-#### **Contributing:**
-- Contributions are welcome! Please fork the repository and submit a pull request with your improvements.
-- Ensure that your code follows the project's coding standards and includes appropriate documentation.
-
-#### **Reporting Issues:**
-- If you encounter any bugs or have feature requests, please open an issue in the [GitHub Issues](https://github.com/your-repo/victronvrm/issues) section.
-
-#### **Support:**
-- For support, join the [ioBroker Community](https://forum.iobroker.net/) and post your questions in the relevant section.
+*Figure 2: Webhook Configuration Interface*
 
 ## **📸 Screenshots**
 
 ![Adapter Configuration](./images/configuration.png)
-*Figure 1: Adapter Configuration Interface*
+*Figure 3: Adapter Configuration Interface*
 
 ![Data Point Overview](./images/data-points.png)
-*Figure 2: Overview of Created Data Points*
+*Figure 4: Overview of Created Data Points*
 
 ![Webhook Event](./images/webhook-event.png)
-*Figure 3: Webhook Event Notification Example*
+*Figure 5: Webhook Event Notification Example*
+
+## **🔧 Advanced Configuration**
+
+### **Automatic Modbus Register Address Search**
+
+The adapter utilizes an internal mechanism to automatically discover and map Modbus register addresses. This feature eliminates the need for manual configuration of register addresses, ensuring that your Victron devices are accurately and efficiently monitored.
+
+**Steps:**
+
+1. **Register Discovery:**
+   - The adapter periodically scans and identifies available Modbus registers based on the **Modbus Polling Interval** (`interval2`).
+   - Detected Modbus registers are mapped to corresponding data points within ioBroker.
+
+2. **Custom Settings Population:**
+   - For each discovered register, the adapter automatically populates the custom settings (`custom.victronvrm`) with necessary parameters such as `slaveId`, `registerAddress`, and `dataType`.
+   - This ensures that Modbus communication is correctly established without manual intervention.
+
+### **Custom Settings Auto-Fill Mechanism**
+
+The automatic population of custom settings simplifies the configuration process by dynamically adjusting to the discovered Modbus registers. This feature ensures that your data points are correctly associated with their respective registers, enabling seamless data retrieval and control.
+
+**Features:**
+
+- **Dynamic Association:** Automatically links data points to their corresponding Modbus registers based on the discovery process.
+- **Error Handling:** Validates the existence and correctness of custom settings to prevent communication errors.
+- **Flexibility:** Easily extendable to accommodate new data points and register mappings as your system evolves.
+
+### **Optional Webhook Integration**
+
+Webhooks enhance the adapter's functionality by enabling real-time communication with external services. This optional feature allows you to integrate your Victron Energy system with platforms like **IFTTT**, **Zapier**, or custom automation scripts for advanced control and notifications.
+
+**Benefits:**
+
+- **Real-Time Notifications:** Receive immediate alerts based on specific events or data point changes.
+- **Automation:** Trigger automated workflows in response to changes in your energy system.
+- **Integration:** Seamlessly connect with a wide range of third-party services to expand your system's capabilities.
 
 ## **📜 License**
 This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
 ## **👤 Author**
-**Your Name**  
-[GitHub](https://github.com/your-username) | [Email](mailto:your-email@example.com)
-
----
-**Thank you for using the Victron VRM Adapter for ioBroker!**  
-Feel free to contribute and help improve the adapter as it evolves.
-
-
+**SOlarPunkTopo**  
+[GitHub](https://github.com/SolarPunkTopo) | [Email](mailto:your-email@example.com)
 
 
 

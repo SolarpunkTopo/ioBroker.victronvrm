@@ -117,7 +117,7 @@ class VictronVrmAdapter extends utils.Adapter {
         
 				
 	
-			
+	await	this.tools.setAlive();
 		
 	
 	
@@ -126,7 +126,7 @@ class VictronVrmAdapter extends utils.Adapter {
 	
 	// Starte den API-Polling-Prozess
     await   this.vrm.startPolling(BearerToken, this.installations, (interval*1000));
-    await	this.tools.setAlive();
+    
 
 
 
@@ -172,6 +172,9 @@ this.getObjectView('system', 'custom', {}, (err, doc) => {
         this.log.error(`Fehler beim Abrufen der Objekte: ${err}`);
     }
 });
+
+
+
 
 
 this.subscribeObjects('*');
