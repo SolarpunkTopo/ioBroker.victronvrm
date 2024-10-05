@@ -49,6 +49,18 @@ class VictronVrmAdapter extends utils.Adapter {
         // Adapter ist bereit und startet
         this.log.info('Victron VRM Adapter gestartet.');
 
+		 // Immediately set the connection state to true
+		await this.setStateAsync('info.connection', { val: true, ack: true });
+		this.log.info('Victron VRM Adapter started and connection state set to true.');
+
+
+
+
+		await	this.tools.setAlive();
+
+
+
+
         // API-Key und andere Einstellungen aus den Konfigurationen lesen
         // Initialisiere die Konfiguration
 		const VrmApiToken = this.config.VrmApiToken;
@@ -117,7 +129,7 @@ class VictronVrmAdapter extends utils.Adapter {
         
 				
 	
-	await	this.tools.setAlive();
+	
 		
 	
 	
@@ -137,7 +149,7 @@ class VictronVrmAdapter extends utils.Adapter {
 
 
 // Lade alle Objekte mit benutzerdefinierten Einstellungen für diesen Adapter
-this.getObjectView('system', 'custom', {}, (err, doc) => {
+await this.getObjectView('system', 'custom', {}, (err, doc) => {
     if (!err && doc && doc.rows) {
         doc.rows.forEach(row => {
             const obj = row.value;
