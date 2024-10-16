@@ -1,9 +1,10 @@
 {
   "type": "panel",
+  "hidden": "!customObj._id.endsWith('rawValue')",
   "items": {
     "slaveId": {
       "type": "number",
-	   "readonly": true,
+      "readonly": true,
       "min": 1,
       "max": 247,
       "default": 100,
@@ -14,57 +15,59 @@
     "dbusPath": {
       "type": "text",
       "default": "",
-	   "readonly": true,
+      "readonly": true,
       "label": "dbusPath",
       "description": "Der dbus-Pfad des Datenpunkts",
-      "visible": "customEnabled === true && objectID.endsWith('rawValue')"
+      "visible": "customEnabled === true"
     },
-	"registerAddress": {
+    "registerAddress": {
       "type": "number",
-	   "readonly": true,
+      "readonly": true,
       "min": 0,
       "max": 65535,
       "default": 0,
       "label": "Registeradresse",
       "description": "Die Modbus-Registeradresse für diesen Datenpunkt",
-      "visible": "customEnabled === true && objectID.endsWith('rawValue')"
+      "visible": "customEnabled === true"
     },
-	"Scalefactor": {
+    "Scalefactor": {
       "type": "number",
-	   "readonly": true,
+      "readonly": true,
       "min": 1,
       "max": 1000,
       "default": 0,
       "label": "Skalierungsfaktor",
-      "description": "optional: Faktor von Modbus vorgegeben",
-      "visible": "customEnabled === true && objectID.endsWith('rawValue')"
+      "description": "Optional: Faktor von Modbus vorgegeben",
+      "visible": "customEnabled === true"
     },
-	"dbusunit": {
-		"type": "text",
-		"label": "Einheit für Wert",
-		"visible": "customEnabled === true && objectID.endsWith('rawValue')"
-	},
-	"writable": {
-		"type": "text",
-		"default":"no",
-		"label": "Wert beschreibbar für Modbus Ja/Nein",
-		"visible": "customEnabled === true && objectID.endsWith('rawValue')"
-	},
+    "dbusunit": {
+      "type": "text",
+      "readonly": true,
+      "label": "Einheit für Wert",
+      "visible": "customEnabled === true"
+    },
+    "writable": {
+      "type": "text",
+      "readonly": true,
+      "default": "no",
+      "label": "Wert beschreibbar für Modbus Ja/Nein",
+      "visible": "customEnabled === true"
+    },
     "dataType": {
       "type": "select",
-	   "readonly": true,
+      "readonly": true,
       "options": [
-    { "value": "uint16", "label": "uint16" },
-    { "value": "int16", "label": "int16" },
-    { "value": "uint32", "label": "uint32" },
-    { "value": "int32", "label": "int32" },
-    { "value": "float32", "label": "float32" },
-    { "value": "string", "label": "string" }
-  ],
+        { "value": "uint16", "label": "uint16" },
+        { "value": "int16", "label": "int16" },
+        { "value": "uint32", "label": "uint32" },
+        { "value": "int32", "label": "int32" },
+        { "value": "float32", "label": "float32" },
+        { "value": "string", "label": "string" }
+      ],
       "default": "uint16",
       "label": "Datentyp",
       "description": "Der Datentyp für diesen Datenpunkt",
-      "visible": "customEnabled === true && objectID.endsWith('rawValue')"
+      "visible": "customEnabled === true"
     },
     "_webhookSection": {
       "type": "panel",
@@ -84,8 +87,8 @@
           "description": "Der Variablenname, der an den Webhook übergeben wird",
           "visible": "customEnabled === true && useWebhook === true"
         }
-      },
-      "visible": "customEnabled === true"
+      }
+      
     }
   }
 }

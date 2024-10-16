@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "victronvrm",
-    "version": "0.0.19",
+    "version": "0.0.20",
     "supportCustoms": true,
     "customs": {
       "victronvrm": {
@@ -16,11 +16,29 @@
     "title": "Victron VRM Portal",
     "titleLang": {
       "en": "Victron VRM Portal",
-      "de": "Victron VRM-Portal"
+      "de": "Victron VRM-Portal",
+      "ru": "Портал Victron VRM",
+      "pt": "Portal Victron VRM",
+      "nl": "Victron VRM-portaal",
+      "fr": "Portail Victron VRM",
+      "it": "Portale Victron VRM",
+      "es": "Portal VRM de Victron",
+      "pl": "Portal VRM firmy Victron",
+      "uk": "Портал Victron VRM",
+      "zh-cn": "Victron VRM 门户"
     },
     "desc": {
       "en": "Data from the VRM Portal",
-      "de": "Daten aus dem VRM-Portal"
+      "de": "Daten aus dem VRM-Portal",
+      "ru": "Данные с портала VRM",
+      "pt": "Dados do Portal VRM",
+      "nl": "Gegevens van het VRM-portaal",
+      "fr": "Données du portail VRM",
+      "it": "Dati dal portale VRM",
+      "es": "Datos del Portal VRM",
+      "pl": "Dane z Portalu VRM",
+      "uk": "Дані з порталу VRM",
+      "zh-cn": "来自 VRM 门户的数据"
     },
     "authors": [
       "Topo <balance2400@gmail.com>"
@@ -48,7 +66,7 @@
     "dataSource": "poll",
     "adminUI": {
       "config": "json",
-	  "custom": "json"
+      "custom": "json"
     },
     "dependencies": [
       {
@@ -67,11 +85,9 @@
     "installationName": "",
     "username": "",
     "password": "",
-	"interval": 120,
-	"interval2": 5,
-	"interval3": 30
-	
-	
+    "interval": 120,
+    "interval2": 5,
+    "interval3": 30
   },
   "objects": [],
   "instanceObjects": [

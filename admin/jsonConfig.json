@@ -75,15 +75,11 @@
 			"label": "Installation IDs",
 			"default": "",
 			"description": "Gib die Installation IDs als kommagetrennte Liste ein, z.B. id1,id2,id3"
-		},
-	
+		}
+
 	}
 	
-    },
-    "_tab3": {
-      "type": "panel",
-      "label": "Anlagendaten2",
-      "items": {}
     }
+    
   }
 }
