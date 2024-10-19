@@ -11,6 +11,8 @@ const SQLiteDB      = require('./lib/libdb.js'); // Import SQLiteDB class
 const ModbusClient  = require('./lib/libmodbus');
 const WebhookClient = require('./lib/libWebhook');
 
+const ModbusDataManager = require('./lib/libModbusDataManager.js');
+
 // Hauptadapter-Klasse
 class VictronVrmAdapter extends utils.Adapter {
 
@@ -38,6 +40,8 @@ class VictronVrmAdapter extends utils.Adapter {
         this.modbusClient = new ModbusClient(this);
         this.webhookClient = new WebhookClient(this); // New instance of WebhookClient
 
+		this.modbusDataManager = new ModbusDataManager(this); //from xlsx Register update to sqlite3 db!
+
         // Initialize enabledDatapoints
         this.enabledDatapoints = new Set();
 
@@ -48,6 +52,11 @@ class VictronVrmAdapter extends utils.Adapter {
     async onReady() {
         // Log adapter start
         this.log.info('Victron VRM Adapter gestartet.');
+
+		// Prüfe und aktualisiere die XLSX-Datei und die SQLite-Datenbank
+        await this.modbusDataManager.checkAndUpdateXlsxFile();
+
+
 
         // Immediately set the connection state to true
         await this.setStateAsync('info.connection', { val: true, ack: true });
