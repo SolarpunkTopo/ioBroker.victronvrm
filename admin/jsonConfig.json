@@ -20,19 +20,12 @@
           "label": "API-Token des VRM Portals",
           "sm": 3
         },
-		"idUser": {
+        "idUser": {
           "type": "text",
-	      "label": "(Optional) USER-ID des VRM Portals",
+          "label": "(Optional) USER-ID des VRM Portals",
           "sm": 3
         },
-
-        "VenusIP": {
-          "newline": true,
-		  "type": "text",
-          "label": "IP Adresse der Venus/Cerbo GX",
-          "sm": 3
-        },
-		
+        
         "interval": {
           "type": "number",
           "label": "Abfrageintervall (s)",
@@ -40,7 +33,33 @@
           "max": 600,
           "step": 5,
           "sm": 3
+        }
+      }
+    },
+    "_tabWebhook": {
+      "type": "panel",
+      "label": "Webhook Einstellungen",
+      "items": {
+        "webhookUrl": {
+          "type": "text",
+          "label": "Webhook-URL",
+          "description": "Die URL, an die der Webhook gesendet wird",
+          "sm": 6
         },
+        "interval3": {
+          "type": "number",
+          "label": "Intervall für Webhook Requests (s)",
+          "min": 10,
+          "max": 600,
+          "step": 1,
+          "sm": 3
+        }
+      }
+    },
+    "_tabModbus": {
+      "type": "panel",
+      "label": "Modbus Einstellungen",
+      "items": {
         "interval2": {
           "type": "number",
           "label": "Abfrageintervall Modbus (s)",
@@ -49,37 +68,29 @@
           "step": 1,
           "sm": 3
         },
-		"interval3": {
-          "type": "number",
-          "label": "Intervall für Webhook Requests (s)",
-          "min": 10,
-          "max": 600,
-          "step": 1,
+        "VenusIP": {
+          "type": "text",
+          "label": "IP Adresse der Venus/Cerbo GX",
           "sm": 3
         },
-		"webhookUrl": {
+        "xlsxUrl": {
           "type": "text",
-          "label": "Webhook-URL",
-          "description": "Die URL, an die der Webhook gesendet wird",
+          "label": "URL zum Herunterladen der XLSX-Datei",
           "sm": 6
         }
       }
     },
-    
-	"_tab2": {
+    "_tabAnlagendaten": {
       "type": "panel",
       "label": "Anlagendaten",
       "items": {
-		"installationsIDs": {
-			"type": "text",
-			"label": "Installation IDs",
-			"default": "",
-			"description": "Gib die Installation IDs als kommagetrennte Liste ein, z.B. id1,id2,id3"
-		}
-
-	}
-	
+        "installationsID": {
+          "type": "text",
+          "label": "Anlagen-ID",
+          "default": "",
+          "description": "Gib die Anlagen-ID ein"
+        }
+      }
     }
-    
   }
 }

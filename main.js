@@ -150,7 +150,7 @@ class VictronVrmAdapter extends utils.Adapter {
                     this.log.error(`Fehler beim Abrufen der Objekte: ${err}`);
                 }
             });
-        }, 180000); // 180,000 ms = 180 seconds
+        }, 120000); // 120,000 ms = 120 seconds
 
         // Subscribe to all objects
         this.subscribeObjects('*');
