@@ -1,7 +1,6 @@
 'use strict';
 
 const utils         = require('@iobroker/adapter-core');
-const request       = require('request');
 const axios         = require('axios').default;
 const ModbusRTU     = require('modbus-serial');
 
