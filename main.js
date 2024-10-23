@@ -68,7 +68,7 @@ class VictronVrmAdapter extends utils.Adapter {
         await this.tools.setAlive();
 
         // Read configuration settings
-        const VrmApiToken = this.config.VrmApiToken;
+        let VrmApiToken = this.config.VrmApiToken;
         const username = this.config.username;
         const password = this.config.password;
         const interval = this.config.interval || 240;
@@ -90,36 +90,48 @@ class VictronVrmAdapter extends utils.Adapter {
             return;
         }
 
-        try {
-            if ((!idUser || idUser === 0) && !VrmApiToken) {
-                // API-Login and fetch API data
-                const result = await this.vrm.getApiToken(username, password);
-                BearerToken = result.BearerToken;
-                idUser = result.idUser;
 
-                // Save idUser and BearerToken in separate states
-                await this.setStateAsync('native.idUser', { val: idUser, ack: true });
-                await this.setStateAsync('native.BearerToken', { val: BearerToken, ack: true });
-            } else {
+        // try {
+            // if (!idUser || idUser === 0) {
+                // // API-Login and fetch API data
+             // let    { BearerToken, idUser } = await this.vrm.getApiToken(username, password);
+                
+				// // Update adapter instance variables with new values
+							// this.BearerToken = BearerToken;
+							// this.idUser = idUser;
+			
+
+                
+            // } else {
                 if (!idUser || idUser === 0) {
                     // Fetch idUser from VRM API
                     idUser = await this.vrm.getUserId();
-
+			
                     this.updateConfig({ idUser: idUser });
                     this.log.warn('idUser geholt: ' + idUser);
                 }
-            }
+				
+            // }
+
+			// if ((!VrmApiToken || VrmApiToken==0) && BearerToken && this.idUser){
+				
+				// VrmApiToken = await this.vrm.getLongTermApiToken(BearerToken, this.idUser);
+				// this.VrmApiToken = VrmApiToken;
+				// this.updateConfig({ VrmApiToken: VrmApiToken });
+                // this.log.warn('VrmApiToken: ' + JSON.stringify(VrmApiToken));
+				
+			// } else this.log.error('KEIN BearerToken: '+ BearerToken +' bzw. idUser : '+this.idUser +' verfügbar');
+
+
 
             // Fetch installations based on BearerToken and idUser
             this.installations = await this.vrm.getInstallationId(BearerToken, idUser);
 
-            // Update adapter instance variables with new values
-            this.BearerToken = BearerToken;
-            this.idUser = idUser;
+            
 
-        } catch (error) {
-            this.log.error('Error fetching API token or installation ID:', error);
-        }
+        // } catch (error) {
+            // this.log.error('Error fetching API token or installation ID:', error);
+        // }
 
         // Start the API polling process
         await this.vrm.startPolling(BearerToken, this.installations, interval * 1000);
