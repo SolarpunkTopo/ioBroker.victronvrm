@@ -25,7 +25,7 @@
     "node": ">= 10"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.1.6",
+    "@iobroker/adapter-core": "^3.2.2",
     "axios": "^1.7.7",
     "exceljs": "^4.4.0",
     "modbus-serial": "^8.0.17",
