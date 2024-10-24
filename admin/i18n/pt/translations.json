@@ -1,0 +1,16 @@
+{
+    "general_settings_label": "Configurações Gerais",
+    "username_label": "Nome de usuário",
+    "password_label": "Senha",
+    "vrm_api_token_label": "Token API do Portal VRM",
+    "id_user_label": "(Opcional) ID DE USUÁRIO do Portal VRM",
+    "venus_ip_label": "Endereço IP de Vênus/Cerbo GX",
+    "interval_label": "Intervalo(s) de consulta(s)",
+    "interval2_label": "Intervalo de consulta Modbus(s)",
+    "interval3_label": "Intervalo para solicitação(ões) de webhook",
+    "webhook_url_label": "URL do webhook",
+    "webhook_url_description": "O URL para o qual o webhook é enviado",
+    "plant_data_label": "Dados da planta",
+    "installations_ids_label": "IDs de instalação",
+    "installations_ids_description": "Insira os IDs de instalação como uma lista separada por vírgulas, por exemplo, id1,id2,id3"
+}

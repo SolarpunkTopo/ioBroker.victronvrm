@@ -1,0 +1,16 @@
+{
+    "general_settings_label": "Ustawienia ogólne",
+    "username_label": "Nazwa użytkownika",
+    "password_label": "Hasło",
+    "vrm_api_token_label": "Token API Portalu VRM",
+    "id_user_label": "(Opcjonalnie) Identyfikator UŻYTKOWNIKA portalu VRM",
+    "venus_ip_label": "Adres IP Venus/Cerbo GX",
+    "interval_label": "Interwał zapytania (s)",
+    "interval2_label": "Interwał zapytań Modbus (s)",
+    "interval3_label": "Interwał żądań webhooka",
+    "webhook_url_label": "Adres URL webhooka",
+    "webhook_url_description": "Adres URL, na który wysyłany jest element webhook",
+    "plant_data_label": "Dane roślin",
+    "installations_ids_label": "Identyfikatory instalacji",
+    "installations_ids_description": "Wprowadź identyfikatory instalacji w postaci listy rozdzielonej przecinkami, np. id1,id2,id3"
+}

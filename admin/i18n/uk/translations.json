@@ -1,0 +1,16 @@
+{
+    "general_settings_label": "Загальні налаштування",
+    "username_label": "Ім'я користувача",
+    "password_label": "Пароль",
+    "vrm_api_token_label": "Маркер API порталу VRM",
+    "id_user_label": "(Необов’язково) ID КОРИСТУВАЧА порталу VRM",
+    "venus_ip_label": "IP-адреса Venus/Cerbo GX",
+    "interval_label": "Інтервал запиту (с)",
+    "interval2_label": "Інтервал запиту Modbus (s)",
+    "interval3_label": "Інтервал для запитів на вебхук (и)",
+    "webhook_url_label": "URL-адреса вебхуку",
+    "webhook_url_description": "URL-адреса, на яку надсилається вебхук",
+    "plant_data_label": "Дані заводу",
+    "installations_ids_label": "Ідентифікатори встановлення",
+    "installations_ids_description": "Введіть ідентифікатори встановлення у вигляді списку, розділеного комами, наприклад, id1,id2,id3"
+}

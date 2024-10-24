@@ -1,0 +1,16 @@
+{
+    "general_settings_label": "常规设置",
+    "username_label": "用户名",
+    "password_label": "密码",
+    "vrm_api_token_label": "VRM Portal的API Token",
+    "id_user_label": "（可选）VRM Portal的用户ID",
+    "venus_ip_label": "Venus/Cerbo GX的IP地址",
+    "interval_label": "查询间隔（秒）",
+    "interval2_label": "查询间隔 Modbus (s)",
+    "interval3_label": "Webhook 请求的间隔（秒）",
+    "webhook_url_label": "网络钩子 URL",
+    "webhook_url_description": "Webhook 发送到的 URL",
+    "plant_data_label": "工厂数据",
+    "installations_ids_label": "安装 ID",
+    "installations_ids_description": "输入以逗号分隔的列表形式的安装 ID，例如 id1,id2,id3"
+}
