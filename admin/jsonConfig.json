@@ -5,16 +5,7 @@
       "type": "panel",
       "label": "Allgemeine Einstellungen",
       "items": {
-        "username": {
-          "type": "text",
-          "label": "Username",
-          "sm": 3
-        },
-        "password": {
-          "type": "password",
-          "label": "Passwort",
-          "sm": 3
-        },
+       
         "VrmApiToken": {
           "type": "text",
           "label": "API-Token des VRM Portals",
@@ -75,7 +66,7 @@
         },
         "xlsxUrl": {
           "type": "text",
-          "label": "URL zum Herunterladen der XLSX-Datei",
+          "label": "(optional) URL zum Herunterladen der XLSX-Datei",
           "sm": 6
         }
       }

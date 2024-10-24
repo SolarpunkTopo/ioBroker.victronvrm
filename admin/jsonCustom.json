@@ -2,6 +2,13 @@
   "type": "panel",
   "hidden": "!customObj._id.endsWith('rawValue')",
   "items": {
+    "enableModbus": {
+      "type": "checkbox",
+      "default": false,
+      "label": "Modbus-Abfrage aktivieren (nur wenn für diesen Datenpunkt der CCGX erreichbar ist)",
+      "description": "Aktiviere oder deaktiviere die Modbus-Abfrage für diesen Datenpunkt",
+      "visible": "customEnabled === true"
+    },
     "slaveId": {
       "type": "number",
       "readonly": true,
@@ -10,7 +17,7 @@
       "default": 100,
       "label": "Slave-ID",
       "description": "Die Slave-ID des Modbus-Geräts",
-      "visible": "customEnabled === true"
+      "visible": "customEnabled === true && enableModbus === true"
     },
     "dbusPath": {
       "type": "text",
@@ -18,7 +25,7 @@
       "readonly": true,
       "label": "dbusPath",
       "description": "Der dbus-Pfad des Datenpunkts",
-      "visible": "customEnabled === true"
+      "visible": "customEnabled === true && enableModbus === true"
     },
     "registerAddress": {
       "type": "number",
@@ -28,7 +35,7 @@
       "default": 0,
       "label": "Registeradresse",
       "description": "Die Modbus-Registeradresse für diesen Datenpunkt",
-      "visible": "customEnabled === true"
+      "visible": "customEnabled === true && enableModbus === true"
     },
     "Scalefactor": {
       "type": "number",
@@ -38,20 +45,20 @@
       "default": 0,
       "label": "Skalierungsfaktor",
       "description": "Optional: Faktor von Modbus vorgegeben",
-      "visible": "customEnabled === true"
+      "visible": "customEnabled === true && enableModbus === true"
     },
     "dbusunit": {
       "type": "text",
       "readonly": true,
       "label": "Einheit für Wert",
-      "visible": "customEnabled === true"
+      "visible": "customEnabled === true && enableModbus === true"
     },
     "writable": {
       "type": "text",
       "readonly": true,
       "default": "no",
       "label": "Wert beschreibbar für Modbus Ja/Nein",
-      "visible": "customEnabled === true"
+      "visible": "customEnabled === true && enableModbus === true"
     },
     "dataType": {
       "type": "select",
@@ -67,7 +74,7 @@
       "default": "uint16",
       "label": "Datentyp",
       "description": "Der Datentyp für diesen Datenpunkt",
-      "visible": "customEnabled === true"
+      "visible": "customEnabled === true && enableModbus === true"
     },
     "_webhookSection": {
       "type": "panel",
@@ -88,7 +95,6 @@
           "visible": "customEnabled === true && useWebhook === true"
         }
       }
-      
     }
   }
 }
