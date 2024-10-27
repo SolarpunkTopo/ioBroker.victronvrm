@@ -76,6 +76,16 @@
       "description": "Der Datentyp für diesen Datenpunkt",
       "visible": "customEnabled === true && enableModbus === true"
     },
+    "modbusInterval": {
+      "type": "number",
+      "default": 60,
+      "min": 1,
+      "max": 3600,
+      "step": 1,
+      "label": "Modbus-Polling Intervall (s)",
+      "description": "Intervall für die Modbus-Abfrage dieses Datenpunkts in Sekunden",
+      "visible": "customEnabled === true && enableModbus === true"
+    },
     "_webhookSection": {
       "type": "panel",
       "label": "Webhook-Einstellungen",
@@ -92,6 +102,16 @@
           "default": "",
           "label": "Variablenname für Webhook",
           "description": "Der Variablenname, der an den Webhook übergeben wird",
+          "visible": "customEnabled === true && useWebhook === true"
+        },
+        "webhookInterval": {
+          "type": "number",
+          "default": 300,
+          "min": 10,
+          "max": 3600,
+          "step": 1,
+          "label": "Webhook-Polling Intervall (s)",
+          "description": "Intervall für die Webhook-Abfrage dieses Datenpunkts in Sekunden",
           "visible": "customEnabled === true && useWebhook === true"
         }
       }
