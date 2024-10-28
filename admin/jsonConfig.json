@@ -34,12 +34,12 @@
         "webhookUrl": {
           "type": "text",
           "label": "Webhook-URL",
-          "description": "Die URL, an die der Webhook gesendet wird",
+          "description": "Die globale URL, an die der Webhook gesendet wird wenn im Datenpunkt keine spezifische URL gesetzt wird",
           "sm": 6
         },
         "interval3": {
           "type": "number",
-          "label": "Intervall für Webhook Requests (s)",
+          "label": "globales Intervall für Webhook Requests (s) wenn im Datenpunkt kein spezielles Intervall gesetzt ist (0)",
           "min": 10,
           "max": 600,
           "step": 1,
@@ -66,6 +66,7 @@
         },
         "xlsxUrl": {
           "type": "text",
+		  "default": "https://raw.githubusercontent.com/victronenergy/dbus_modbustcp/master/CCGX-Modbus-TCP-register-list.xlsx",
           "label": "(optional) URL zum Herunterladen der XLSX-Datei",
           "sm": 6
         }

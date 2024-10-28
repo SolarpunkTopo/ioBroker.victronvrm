@@ -106,12 +106,19 @@
         },
         "webhookInterval": {
           "type": "number",
-          "default": 300,
+          "default": 0,
           "min": 10,
           "max": 3600,
           "step": 1,
           "label": "Webhook-Polling Intervall (s)",
           "description": "Intervall für die Webhook-Abfrage dieses Datenpunkts in Sekunden",
+          "visible": "customEnabled === true && useWebhook === true"
+        },
+        "webhookUrl": {
+          "type": "text",
+          "default": "",
+          "label": "Webhook-URL",
+          "description": "Individuelle URL für den Webhook dieses Datenpunkts. Wenn nicht gesetzt, wird die globale URL verwendet.",
           "visible": "customEnabled === true && useWebhook === true"
         }
       }

@@ -126,7 +126,8 @@ class VictronVrmAdapter extends utils.Adapter {
                                 }
 
                                 // Start Webhook polling if needed
-                                const webhookInterval = (customSettings.webhookInterval || 300) * 1000;
+                                let webhookInterval = customSettings.webhookInterval > 0 ? customSettings.webhookInterval : this.config.interval3 || 30;
+								webhookInterval = webhookInterval * 1000;
                                 this.webhookClient.startPollingWebhook(row.id, customSettings, webhookInterval);
 
                                 this.log.debug(`${row.id} aktiviert in den Einstellungen`);

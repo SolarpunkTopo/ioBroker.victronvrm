@@ -1,6 +1,6 @@
 {
   "name": "iobroker.victronvrm",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "description": "Data from the VRM Portal",
   "author": {
     "name": "Topo",
