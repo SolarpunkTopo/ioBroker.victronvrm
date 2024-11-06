@@ -13,7 +13,7 @@
         },
         "idUser": {
           "type": "text",
-          "label": "(Optional) USER-ID des VRM Portals",
+          "label": "(Optional, wird automatisch ermittelt) USER-ID des VRM Portals",
           "sm": 3
         },
         
@@ -78,9 +78,9 @@
       "items": {
         "installationsID": {
           "type": "text",
-          "label": "Anlagen-ID",
+          "label": "(Optional) Anlagen-ID",
           "default": "",
-          "description": "Gib die Anlagen-ID ein"
+          "description": "(Optional) Gib die Anlagen-ID ein die per Modbus erreichbar ist"
         }
       }
     }

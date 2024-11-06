@@ -62,7 +62,6 @@ The **Victron VRM Adapter** for **ioBroker** seamlessly integrates your Victron 
 - **Automatic Modbus Register Address Search:** Automatically discovers and maps Modbus register addresses.
 - **Custom Settings Auto-Fill:** Simplifies configuration by automatically populating custom settings based on detected data points.
 - **Optional Webhook Integration:** Enhance your setup with webhooks for real-time notifications and integrations.
-- **Reliable Data Monitoring:** Continuously monitors your Victron devices to provide up-to-date energy metrics.
 
 ## **🛠 Detailed Setup and Configuration Guide**
 
@@ -90,40 +89,7 @@ The **Victron VRM Adapter** for **ioBroker** seamlessly integrates your Victron 
 
 ### **2. Configuration**
 
-#### **Accessing the Adapter Settings:**
-- Open the **ioBroker Admin Interface**.
-- Navigate to **"Adapters"** and locate **"Victron VRM"**.
-- Click the **"Settings"** (gear) icon to configure the adapter.
 
-#### **Configuration Parameters:**
-
-1. **VRM API Token (`VrmApiToken`):**
-   - Enter your **Victron VRM API Token** for authentication.
-   - **Note:** Alternatively, you can provide your **username** and **password** if you prefer not to use an API token.
-
-2. **Username and Password:**
-   - If not using an API token, provide your **Victron VRM** **username** and **password**.
-
-3. **Polling Intervals:**
-   - **VRM Polling Interval (`interval`):**  
-     Set the interval in seconds for querying the **VRM portal** to fetch the latest energy system data.  
-     **Default:** 240 seconds  
-     **Purpose:** Ensures that the adapter regularly updates data from the VRM portal to keep your energy metrics current.
-   
-   - **Modbus Polling Interval (`interval2`):**  
-     Set the interval in seconds for polling **Modbus registers** to read real-time data from your Victron devices.  
-     **Default:** 10 seconds  
-     **Purpose:** Allows the adapter to continuously monitor and retrieve data from Modbus-enabled devices, ensuring up-to-date information.
-   
-   - **Webhook Polling Interval (`interval3`):**  
-     Set the interval in seconds for invoking the **webhook URLs** to send real-time notifications or trigger external integrations.  
-     **Default:** 30 seconds  
-     **Purpose:** Facilitates timely communication with external services or automation platforms through webhooks.
-
-4. **Webhook Configuration (Optional):**
-   - **Enable Webhook:** Toggle to enable or disable webhook functionality.
-   - **Webhook URL:** Specify the endpoint to receive webhook events.
-   - **Events to Trigger:** Select which events should trigger a webhook notification (e.g., data point changes, system alerts).
 
 #### **Automatic Modbus Register Address Search:**
 

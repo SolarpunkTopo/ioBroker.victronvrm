@@ -4,7 +4,7 @@ const utils = require('@iobroker/adapter-core');
 const axios = require('axios').default;
 const ModbusRTU = require('modbus-serial');
 const VRM = require('./lib/libvrm.js');
-const TOOLS = require('./lib/vrmutils.js');
+const vrmutils = require('./lib/vrmutils.js');
 const SQLiteDB = require('./lib/libdb.js'); // Import SQLiteDB class
 const ModbusClient = require('./lib/libmodbus');
 const WebhookClient = require('./lib/libWebhook');
@@ -27,13 +27,14 @@ class VictronVrmAdapter extends utils.Adapter {
         this.on('unload', this.onUnload.bind(this));
         this.on('message', this.onMessage.bind(this));
         this.on('objectChange', this.onObjectChange.bind(this)); 
+		this.on("stateChange", this.onStateChange.bind(this));
 
         // Other initializations
         this.modbusPollingInterval = null; // Will hold the polling interval ID
 
         // Objects
         this.vrm = new VRM(this); // Create VRM instance
-        this.tools = new TOOLS(this); // Create VRM-utils
+        this.vrmutils = new vrmutils(this); // Create VRM-utils
         this.modbusClient = new ModbusClient(this);
         this.webhookClient = new WebhookClient(this); // New instance of WebhookClient
 
@@ -61,7 +62,7 @@ class VictronVrmAdapter extends utils.Adapter {
         this.startHeartbeat();
 
         // Set Alive (if this method is essential)
-        await this.tools.setAlive();
+        await this.vrmutils.setAlive();
 
         // Read configuration settings
         let VrmApiToken = this.config.VrmApiToken;
@@ -142,6 +143,7 @@ class VictronVrmAdapter extends utils.Adapter {
 
         // Subscribe to all objects
         this.subscribeObjects('*');
+		this.subscribeForeignStates('*');
     }
 
     startHeartbeat() {
@@ -261,6 +263,41 @@ class VictronVrmAdapter extends utils.Adapter {
             }
         }
     }
+	
+async onStateChange(id, state) {
+    
+	
+	if (state && !state.ack) {
+        
+		this.log.info(`Wert von ${id} wurde geändert: ${state.val}`);
+		// Prüfe, ob der Datenpunkt zur aktuellen Instanz gehört und Modbus aktiviert ist
+        if (id.startsWith(`${this.namespace}.`) && this.enabledDatapoints.has(id)) {
+            this.log.info(`Wert von ${id} wurde geändert: ${state.val}`);
+
+            // Prüfe, ob die Modbus-Abfrage für diesen Datenpunkt aktiviert ist
+            const obj = await this.getObjectAsync(id);
+            if (obj && obj.common && obj.common.custom && obj.common.custom[this.namespace]) {
+                const customSettings = obj.common.custom[this.namespace];
+                const isModbusEnabled = !!customSettings.enableModbus;
+
+                if (isModbusEnabled) {
+                    // Starte Modbus-Schreiboperation mit dem neuen Wert
+                    this.log.info(`writeregister wird  getriggert`);
+					this.modbusClient.writeRegister(id, state.val, customSettings);
+                }
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
 
     async onMessage(obj) {
         // Handle incoming messages if necessary

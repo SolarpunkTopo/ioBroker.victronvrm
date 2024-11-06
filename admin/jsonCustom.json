@@ -23,8 +23,8 @@
       "type": "text",
       "default": "",
       "readonly": true,
-      "label": "dbusPath",
-      "description": "Der dbus-Pfad des Datenpunkts",
+      "label": "(Optional, wird automatisch ermittelt) dbusPath",
+      "description": "(Optional, wird automatisch ermittelt) Der dbus-Pfad des Datenpunkts",
       "visible": "customEnabled === true && enableModbus === true"
     },
     "registerAddress": {
@@ -33,8 +33,8 @@
       "min": 0,
       "max": 65535,
       "default": 0,
-      "label": "Registeradresse",
-      "description": "Die Modbus-Registeradresse für diesen Datenpunkt",
+      "label": "(Optional, wird automatisch ermittelt) Registeradresse",
+      "description": "(Optional, wird automatisch ermittelt) Die Modbus-Registeradresse für diesen Datenpunkt",
       "visible": "customEnabled === true && enableModbus === true"
     },
     "Scalefactor": {
@@ -43,21 +43,21 @@
       "min": 1,
       "max": 1000,
       "default": 0,
-      "label": "Skalierungsfaktor",
-      "description": "Optional: Faktor von Modbus vorgegeben",
+      "label": "(Optional, wird automatisch ermittelt) Skalierungsfaktor",
+      "description": "(Optional, wird automatisch ermittelt) Faktor des Wertes",
       "visible": "customEnabled === true && enableModbus === true"
     },
     "dbusunit": {
       "type": "text",
       "readonly": true,
-      "label": "Einheit für Wert",
+      "label": "(Optional, wird automatisch ermittelt) Einheit für Wert",
       "visible": "customEnabled === true && enableModbus === true"
     },
     "writable": {
       "type": "text",
       "readonly": true,
       "default": "no",
-      "label": "Wert beschreibbar für Modbus Ja/Nein",
+      "label": "(Optional, wird automatisch ermittelt) Wert beschreibbar für Modbus Ja/Nein",
       "visible": "customEnabled === true && enableModbus === true"
     },
     "dataType": {
@@ -72,13 +72,13 @@
         { "value": "string", "label": "string" }
       ],
       "default": "uint16",
-      "label": "Datentyp",
-      "description": "Der Datentyp für diesen Datenpunkt",
+      "label": "(Optional, wird automatisch ermittelt) Datentyp",
+      "description": "(Optional, wird automatisch ermittelt) Der Datentyp für diesen Datenpunkt",
       "visible": "customEnabled === true && enableModbus === true"
     },
     "modbusInterval": {
       "type": "number",
-      "default": 60,
+      "default": 5,
       "min": 1,
       "max": 3600,
       "step": 1,
