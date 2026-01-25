@@ -8,8 +8,32 @@
         "enabled": {
           "type": "checkbox",
           "default": false,
-          "label": "Modbus-Abfrage aktivieren",
-          "description": "Aktiviere die Modbus-Abfrage für diesen Datenpunkt"
+          "label": {
+            "en": "Enable Modbus polling",
+            "de": "Modbus-Abfrage aktivieren",
+            "ru": "Enable Modbus polling",
+            "pt": "Enable Modbus polling",
+            "nl": "Enable Modbus polling",
+            "fr": "Enable Modbus polling",
+            "it": "Enable Modbus polling",
+            "es": "Enable Modbus polling",
+            "pl": "Enable Modbus polling",
+            "uk": "Enable Modbus polling",
+            "zh-cn": "Enable Modbus polling"
+          },
+          "description": {
+            "en": "Enable Modbus polling for this data point",
+            "de": "Aktiviere die Modbus-Abfrage für diesen Datenpunkt",
+            "ru": "Enable Modbus polling for this data point",
+            "pt": "Enable Modbus polling for this data point",
+            "nl": "Enable Modbus polling for this data point",
+            "fr": "Enable Modbus polling for this data point",
+            "it": "Enable Modbus polling for this data point",
+            "es": "Enable Modbus polling for this data point",
+            "pl": "Enable Modbus polling for this data point",
+            "uk": "Enable Modbus polling for this data point",
+            "zh-cn": "Enable Modbus polling for this data point"
+          }
         }
       }
     },
